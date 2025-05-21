@@ -5,6 +5,8 @@ import { Menu, X } from 'lucide-react';
 import { FaHeart, FaUserCircle } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import { getUserProfile, getStudentProfile, logout } from '../store/authSlice';
+// Import the actual Search component
+import Search from './Contianer/Search';
 
 // Mock authSlice (replace with your actual authSlice)
 const authSlice = {
@@ -42,15 +44,6 @@ const LogoutBtn = () => {
     </Button>
   );
 };
-
-// Mock Search Component
-const Search = () => (
-  <input
-    type="text"
-    placeholder="Search courses..."
-    className="w-full px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-600 dark:text-white transition-all"
-  />
-);
 
 const Navbar = () => {
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
