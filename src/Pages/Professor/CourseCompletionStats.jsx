@@ -49,7 +49,7 @@ const CourseCompletionStats = () => {
 
     const fetchCourseData = async () => {
         try {
-            const response = await axios.get(`https://course-creation-backend.onrender.com/api/courses/details/${courseId}`, {
+            const response = await axios.get(`https://course-creation-backend.onrender.com/api/courses/${courseId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

@@ -62,7 +62,7 @@ const ProfessorCourses = () => {
             // Fetch enrollment and wishlist stats for each course
             const statsPromises = fetchedCourses.map(async (course) => {
                 try {
-                    const enrollmentResponse = await axios.get(`https://course-creation-backend.onrender.com/api/courses/details/${course._id}`, {
+                    const enrollmentResponse = await axios.get(`https://course-creation-backend.onrender.com/api/courses/${course._id}`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
@@ -173,14 +173,7 @@ const ProfessorCourses = () => {
                         <p className="text-gray-600 mt-1">Manage your educational content and track student progress</p>
                     </div>
                     <div className="flex space-x-3 mt-4 md:mt-0">
-                        <Button 
-                            onClick={handleRefresh}
-                            className="bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 px-4 py-2 rounded-md shadow-sm transition-all flex items-center"
-                            disabled={refreshing}
-                        >
-                            <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                            Refresh
-                        </Button>
+                       
                         <Button 
                             onClick={() => navigate('/CourseCreation')}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md shadow-sm transition-all flex items-center"
@@ -255,15 +248,7 @@ const ProfessorCourses = () => {
                             <div className="text-sm text-gray-500">
                                 Showing <span className="font-medium text-gray-700">{courses.length}</span> courses
                             </div>
-                            <div className="flex space-x-2">
-                                <div className="relative">
-                                    <button className="flex items-center space-x-1 bg-white border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        <Filter size={16} />
-                                        <span>Filter</span>
-                                        <ChevronDown size={16} />
-                                    </button>
-                                </div>
-                            </div>
+                           
                         </div>
 
                         {/* Course Table */}
