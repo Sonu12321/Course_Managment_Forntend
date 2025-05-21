@@ -22,22 +22,18 @@ const Button = ({ children, onClick, bgColor = 'bg-blue-500 hover:bg-blue-600', 
   </button>
 );
 
-// Mock LogoutBtn Component
+// Updated LogoutBtn Component to use Redux logout action
 const LogoutBtn = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   return (
     <Button
       onClick={() => {
-        // Dispatch the logout action to update Redux state
-        dispatch({ type: 'LOGOUT' });
-        // Clear any stored tokens in localStorage
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        // Dispatch the logout action from Redux
+        dispatch(logout());
         // Navigate to login page
         navigate('/login');
-        // Force a page refresh to ensure state is reset
-        window.location.reload();
+        // Removed window.location.reload() to prevent Vercel error
       }}
       bgColor="bg-red-500 hover:bg-red-600"
       className="px-4 py-2"
