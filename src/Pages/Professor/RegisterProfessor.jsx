@@ -6,6 +6,7 @@ function RegisterProfessor() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [registered, setRegistered] = useState(false);
   const [form, setForm] = useState({
     firstname: '',
     lastname: '',
@@ -54,7 +55,8 @@ function RegisterProfessor() {
       });
 
       if (response.data) {
-        navigate('/CourseCreation');
+        // Instead of setting registered to true, navigate to verification page
+        navigate('/verify-email', { state: { email } });
       }
     } catch (error) {
       setError(error.response?.data?.error || "Registration failed. Please try again.");
@@ -62,6 +64,37 @@ function RegisterProfessor() {
       setLoading(false);
     }
   };
+
+  // Remove the registered conditional rendering since we're now redirecting
+  // to the verification page instead
+  if (registered) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blue-300 to-white py-14 px-8 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="max-w-md w-full mx-auto space-y-6 bg-white p-8 rounded-xl shadow-lg border border-blue-100">
+          <div className="text-center">
+            <svg className="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h1 className="mt-4 text-3xl text-gray-900 font-bold font-serif">
+              Verification Email Sent!
+            </h1>
+            <p className="mt-2 text-gray-600">
+              We've sent a verification email to <span className="font-medium">{email}</span>. 
+              Please check your inbox and click the verification link to complete your registration.
+            </p>
+          </div>
+          <div className="mt-6">
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-white text-lg font-semibold bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 hover:shadow-lg transition duration-300"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-300 to-white py-14 px-8 sm:px-6 lg:px-8 flex items-center justify-center">

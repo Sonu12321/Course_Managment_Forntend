@@ -23,6 +23,7 @@ import AdminLayout from "./Components/Layouts/AdminLayout"
 import CourseDetails from "./Components/Course/CourseDetails"
 import UserManagement from "./Pages/AdminDashboard/UserManagement"
 import CourseManagement from "./Pages/AdminDashboard/CourseManagement"
+import VerifyEmail from "./Pages/VerifyEmail"
 
 function App() {
   return (
@@ -68,6 +69,8 @@ function App() {
               <Route path="/Professorprofile" element={<ProfessorProfile />} />
               <Route path="/Rotation" element={<Rotation />} />
               <Route path="/course-completion/:courseId" element={<CourseCompletionStats />} />
+              // Add this to your existing routes
+              <Route path="/verify-email" element={<VerifyEmail />} />
             </Routes>
             <Footer/>
           </>
