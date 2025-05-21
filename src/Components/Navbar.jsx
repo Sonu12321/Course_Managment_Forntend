@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Menu, X } from 'lucide-react';
 import { FaHeart, FaUserCircle } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
+import { getUserProfile, getStudentProfile, logout } from '../store/authSlice';
 
 // Mock authSlice (replace with your actual authSlice)
 const authSlice = {
@@ -74,9 +75,9 @@ const Navbar = () => {
   useEffect(() => {
     if (isAuthenticated && token) {
       if (role === 'professor') {
-        dispatch(authSlice.getUserProfile());
+        dispatch(getUserProfile());
       } else {
-        dispatch(authSlice.getStudentProfile());
+        dispatch(getStudentProfile());
       }
     }
 
