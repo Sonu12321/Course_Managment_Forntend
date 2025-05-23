@@ -158,7 +158,7 @@ const Navbar = () => {
       <div
         className={`flex justify-between items-center min-h-[4.5rem] w-full px-6 rounded-xl border border-transparent ${
           isScrolled
-            ? 'bg-white dark:bg-gray-900 shadow-lg'
+            ? 'bg-white dark:bg-gray-700 shadow-lg'
             : 'bg-gray-100/40 dark:bg-gray-800/40 backdrop-blur-md'
         } transition-all duration-300`}
       >
@@ -173,7 +173,7 @@ const Navbar = () => {
           </span>
         </div>
         <div className="flex-grow mx-4 max-w-md hidden sm:block">
-          <Search />
+          <Search className={`search-input ${isScrolled ? 'bg-white' : 'bg-slate-300'}`} />
         </div>
         <ul className="hidden lg:flex ml-10 space-x-4">
           {getNavItems().map((item, index) => (

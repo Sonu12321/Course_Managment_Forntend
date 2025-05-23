@@ -70,10 +70,10 @@ const Search = () => {
                 onChange={handleSearch}
                 onBlur={handleBlur}
                 onFocus={handleFocus}
-                className="search-input w-full py-2 px-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="search-input w-full py-2 px-4 rounded-lg border border-gray-300   focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             {showResults && filteredCourses.length > 0 && (
-                <div className="search-results absolute w-full mt-1 bg-white shadow-lg rounded-lg max-h-60 overflow-y-auto z-50">
+                <div className="search-results absolute w-full mt-1 bg-gray-500 shadow-lg rounded-lg max-h-60 overflow-y-auto z-50">
                     {filteredCourses.map(course => (
                         <div key={course._id} className="course-item p-3 hover:bg-gray-100 cursor-pointer">
                             <h3 className="font-medium">{course.title}</h3>
