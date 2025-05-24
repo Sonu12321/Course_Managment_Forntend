@@ -1,52 +1,213 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import CommentReviews from './CommentReviews';
 import CoursePurchaseController from './CoursePurchaseController';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import ReactConfetti from 'react-confetti';
+import './CourseDetails.css'; // Import the custom CSS
 
 function CourseDetails() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedVideo, setSelectedVideo] = useState(null);
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false); // Add this line
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [completedVideos, setCompletedVideos] = useState([]);
+  const [progress, setProgress] = useState(0);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const { courseId } = useParams();
   const navigate = useNavigate();
+  const API_BASE_URL = 'https://course-creation-backend.onrender.com/api';
 
-  useEffect(() => {
-    const fetchCourseDetails = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          setError('Authentication required. Please log in.');
-          setLoading(false);
-          return;
+  // Function to fetch course details
+  const fetchCourseDetails = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required. Please log in.');
+        setLoading(false);
+        return;
+      }
+
+      const response = await axios.get(`${API_BASE_URL}/courses/courses/${courseId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
+      });
 
-        const response = await axios.get(`https://course-creation-backend.onrender.com/api/courses/courses/${courseId}`, {
+      const courseData = response.data.course;
+      setCourse(courseData);
+      
+      // Set the preview video as the initially selected video
+      setSelectedVideo({
+        title: 'Course Preview',
+        url: courseData.previewVideo,
+        description: 'Preview of the course content',
+        isPreview: true
+      });
+
+      // If course is purchased, fetch progress data
+      if (courseData.isPurchased) {
+        fetchCourseProgress();
+      }
+    } catch (error) {
+      console.error('Error fetching course details:', error);
+      setError('Error fetching course details. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to fetch course progress
+  const fetchCourseProgress = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await axios.get(`${API_BASE_URL}/courses/progress/status/${courseId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      const progressData = response.data;
+      setProgress(progressData.progress || 0);
+      setCompletedVideos(progressData.completedVideos || []);
+      
+      // Update course with progress data
+      setCourse(prevCourse => ({
+        ...prevCourse,
+        progress: progressData.progress || 0,
+        completedVideos: progressData.completedVideos || []
+      }));
+    } catch (error) {
+      console.error('Error fetching course progress:', error);
+      // Don't show error to user, just log it
+    }
+  };
+
+  // Function to mark a video as completed
+  const markVideoAsCompleted = async (videoId) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      // Don't mark if already completed
+      if (completedVideos.includes(videoId)) return;
+
+      const response = await axios.post(
+        `${API_BASE_URL}/courses/progress/track-video`,
+        { courseId, videoId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const updatedProgress = response.data;
+      setProgress(updatedProgress.progress);
+      setCompletedVideos(updatedProgress.completedVideos);
+      
+      // Update course with new progress data
+      setCourse(prevCourse => ({
+        ...prevCourse,
+        progress: updatedProgress.progress,
+        completedVideos: updatedProgress.completedVideos
+      }));
+
+      // Show confetti effect
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+
+      // Show success toast with custom styling
+      toast.success(
+        <div className="flex flex-col items-center">
+          <div className="text-xl font-bold mb-1">🎉 Congratulations! 🎉</div>
+          <div>Video marked as completed!</div>
+          <div className="text-sm mt-1">Progress: {updatedProgress.progress}%</div>
+        </div>,
+        {
+          position: "top-center",
+          autoClose: 4000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          className: "completion-toast",
+          icon: "🏆"
+        }
+      );
+      
+      // Reset video ended state
+      setVideoEnded(false);
+    } catch (error) {
+      console.error('Error marking video as completed:', error);
+      toast.error('Failed to update progress', {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
+    }
+  };
+
+  // Function to reset course progress
+  const resetCourseProgress = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await axios.post(
+        `${API_BASE_URL}/courses/progress/reset/${courseId}`,
+        {},
+        {
           headers: {
             Authorization: `Bearer ${token}`
           }
-        });
+        }
+      );
 
-        const courseData = response.data.course;
-        setCourse(courseData);
-        
-        // Set the preview video as the initially selected video
-        setSelectedVideo({
-          title: 'Course Preview',
-          url: courseData.previewVideo,
-          description: 'Preview of the course content',
-          isPreview: true
-        });
-      } catch (error) {
-        console.error('Error fetching course details:', error);
-        setError('Error fetching course details. Please try again later.');
-      } finally {
-        setLoading(false);
-      }
-    };
+      setProgress(0);
+      setCompletedVideos([]);
+      
+      // Update course with reset progress
+      setCourse(prevCourse => ({
+        ...prevCourse,
+        progress: 0,
+        completedVideos: []
+      }));
 
+      toast.info('Course progress has been reset', {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
+    } catch (error) {
+      console.error('Error resetting course progress:', error);
+      toast.error('Failed to reset progress', {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
+    }
+  };
+
+  // Handle video ended event
+  const handleVideoEnded = () => {
+    if (!selectedVideo.isPreview && course.isPurchased) {
+      setVideoEnded(true);
+    }
+  };
+
+  // Handle marking current video as completed
+  const handleMarkComplete = () => {
+    if (selectedVideo && !selectedVideo.isPreview) {
+      markVideoAsCompleted(selectedVideo._id);
+    }
+  };
+
+  useEffect(() => {
     fetchCourseDetails();
   }, [courseId]);
 
@@ -56,6 +217,7 @@ function CourseDetails() {
       index: index + 1,
       isPreview: false
     });
+    setVideoEnded(false);
   };
 
   const handlePreviewSelect = () => {
@@ -66,6 +228,7 @@ function CourseDetails() {
         description: 'Preview of the course content',
         isPreview: true
       });
+      setVideoEnded(false);
     }
   };
 
@@ -123,6 +286,20 @@ function CourseDetails() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+      {/* Confetti effect when completing a video */}
+      {showConfetti && (
+        <ReactConfetti
+          width={window.innerWidth}
+          height={window.innerHeight}
+          recycle={false}
+          numberOfPieces={500}
+          gravity={0.2}
+        />
+      )}
+      
+      {/* Toast Container for notifications */}
+      <ToastContainer />
+      
       {/* Course Header */}
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden mb-8">
         <div className="relative">
@@ -184,13 +361,19 @@ function CourseDetails() {
                     </svg>
                     <p className="text-green-700 font-medium">You have purchased this course</p>
                   </div>
-                  {course.progress > 0 && (
-                    <div className="mt-3">
-                      <p className="text-sm text-green-600 mb-1">Your progress: {course.progress}%</p>
-                      <div className="w-full bg-gray-200 rounded-full h-2.5">
-                        <div className="bg-green-600 h-2.5 rounded-full" style={{ width: `${course.progress}%` }}></div>
-                      </div>
+                  <div className="mt-3">
+                    <p className="text-sm text-green-600 mb-1">Your progress: {progress}%</p>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div className="bg-green-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
                     </div>
+                  </div>
+                  {progress > 0 && (
+                    <button 
+                      onClick={resetCourseProgress}
+                      className="mt-3 text-xs text-red-500 hover:text-red-700 underline"
+                    >
+                      Reset Progress
+                    </button>
                   )}
                 </div>
               ) : (
@@ -216,6 +399,7 @@ function CourseDetails() {
                     poster={selectedVideo?.isPreview ? course.thumbnail : null}
                     preload="metadata"
                     controlsList="nodownload"
+                    onEnded={handleVideoEnded}
                   >
                     Your browser does not support the video tag.
                   </video>
@@ -229,9 +413,36 @@ function CourseDetails() {
               
               {/* Video Info */}
               <div className="p-4 border-b border-gray-200">
-                <h3 className="text-xl font-semibold text-gray-800">
-                  {selectedVideo?.isPreview ? 'Course Preview' : `${selectedVideo?.index}. ${selectedVideo?.title}`}
-                </h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-semibold text-gray-800">
+                    {selectedVideo?.isPreview ? 'Course Preview' : `${selectedVideo?.index}. ${selectedVideo?.title}`}
+                  </h3>
+                  
+                  {/* Add Mark as Completed button for purchased courses and non-preview videos */}
+                  {course.isPurchased && !selectedVideo?.isPreview && (
+                    <div>
+                      {completedVideos.includes(selectedVideo?._id) ? (
+                        <div className="flex items-center text-green-600">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          <span>Completed</span>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={handleMarkComplete}
+                          className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 ${
+                            videoEnded 
+                              ? 'bg-green-500 text-white animate-pulse shadow-md transform hover:scale-105' 
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {videoEnded ? '✓ Mark as Completed!' : 'Mark as Completed'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <p className="text-gray-600 mt-1">{selectedVideo?.description}</p>
               </div>
               
@@ -277,7 +488,7 @@ function CourseDetails() {
                     </div>
                   </div>
                   
-                  {/* Course Videos - Only show if purchased or if videos are available */}
+                  {/* Course Videos */}
                   {course.videos && course.videos.length > 0 ? (
                     course.videos.map((video, index) => (
                       <div 
@@ -300,7 +511,7 @@ function CourseDetails() {
                             </div>
                           </div>
                           <div className="text-gray-500 text-sm flex items-center">
-                            {course.completedVideos && course.completedVideos.includes(video._id) && (
+                            {completedVideos && completedVideos.includes(video._id) && (
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                               </svg>
