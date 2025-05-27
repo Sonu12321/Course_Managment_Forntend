@@ -6,7 +6,6 @@ import CoursePurchaseController from './CoursePurchaseController';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ReactConfetti from 'react-confetti';
-import './CourseDetails.css'; // Import the custom CSS
 
 function CourseDetails() {
   const [course, setCourse] = useState(null);
@@ -18,6 +17,8 @@ function CourseDetails() {
   const [progress, setProgress] = useState(0);
   const [videoEnded, setVideoEnded] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [totalVideos, setTotalVideos] = useState(0);
+  const [completedCount, setCompletedCount] = useState(0);
   const { courseId } = useParams();
   const navigate = useNavigate();
   const API_BASE_URL = 'https://course-creation-backend.onrender.com/api';
@@ -76,12 +77,16 @@ function CourseDetails() {
       const progressData = response.data;
       setProgress(progressData.progress || 0);
       setCompletedVideos(progressData.completedVideos || []);
+      setTotalVideos(progressData.totalVideos || 0);
+      setCompletedCount(progressData.completedCount || 0);
       
       // Update course with progress data
       setCourse(prevCourse => ({
         ...prevCourse,
         progress: progressData.progress || 0,
-        completedVideos: progressData.completedVideos || []
+        completedVideos: progressData.completedVideos || [],
+        totalVideos: progressData.totalVideos || 0,
+        completedCount: progressData.completedCount || 0
       }));
     } catch (error) {
       console.error('Error fetching course progress:', error);
@@ -112,12 +117,14 @@ function CourseDetails() {
       const updatedProgress = response.data;
       setProgress(updatedProgress.progress);
       setCompletedVideos(updatedProgress.completedVideos);
+      setCompletedCount(updatedProgress.completedVideos.length);
       
       // Update course with new progress data
       setCourse(prevCourse => ({
         ...prevCourse,
         progress: updatedProgress.progress,
-        completedVideos: updatedProgress.completedVideos
+        completedVideos: updatedProgress.completedVideos,
+        completedCount: updatedProgress.completedVideos.length
       }));
 
       // Show confetti effect
@@ -172,12 +179,14 @@ function CourseDetails() {
 
       setProgress(0);
       setCompletedVideos([]);
+      setCompletedCount(0);
       
       // Update course with reset progress
       setCourse(prevCourse => ({
         ...prevCourse,
         progress: 0,
-        completedVideos: []
+        completedVideos: [],
+        completedCount: 0
       }));
 
       toast.info('Course progress has been reset', {
@@ -366,6 +375,9 @@ function CourseDetails() {
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div className="bg-green-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
                     </div>
+                    <p className="text-xs text-gray-600 mt-2">
+                      {completedCount} of {totalVideos} videos completed
+                    </p>
                   </div>
                   {progress > 0 && (
                     <button 
