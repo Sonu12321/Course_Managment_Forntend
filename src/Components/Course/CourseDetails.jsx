@@ -110,8 +110,8 @@ function CourseDetails() {
       if (completedVideos.includes(videoId)) return;
 
       const response = await axios.post(
-        `${API_BASE_URL}/courses/progress/track-video`,
-        { courseId, videoId },
+        `${API_BASE_URL}/courses/progress/mark-completed`,
+        { courseId, videoIds: [videoId] },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -135,8 +135,7 @@ function CourseDetails() {
         completedVideos: updatedProgress.completedVideos,
         completedCount: updatedProgress.completedCount,
         totalVideos: updatedProgress.totalVideos,
-        completionStatus: updatedProgress.completionStatus,
-        videoProgress: updatedProgress.videoProgress
+        completionStatus: updatedProgress.completionStatus
       }));
 
       // Show confetti effect
