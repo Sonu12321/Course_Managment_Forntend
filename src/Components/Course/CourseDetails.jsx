@@ -62,6 +62,9 @@ function CourseDetails() {
     }
   };
 
+  // Add new state for video progress
+  const [videoProgress, setVideoProgress] = useState({});
+
   // Function to fetch course progress
   const fetchCourseProgress = async () => {
     try {
@@ -79,6 +82,7 @@ function CourseDetails() {
       setCompletedVideos(progressData.completedVideos || []);
       setTotalVideos(progressData.totalVideos || 0);
       setCompletedCount(progressData.completedCount || 0);
+      setVideoProgress(progressData.videoProgress || {});
       
       // Update course with progress data
       setCourse(prevCourse => ({
@@ -87,11 +91,73 @@ function CourseDetails() {
         completedVideos: progressData.completedVideos || [],
         totalVideos: progressData.totalVideos || 0,
         completedCount: progressData.completedCount || 0,
+        videoProgress: progressData.videoProgress || {},
         completionStatus: progressData.completionStatus || 'not-started'
       }));
     } catch (error) {
       console.error('Error fetching course progress:', error);
-      // Don't show error to user, just log it
+    }
+  };
+
+  // Function to update video progress
+  const updateVideoProgress = async (videoId, progressPercent) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      const response = await axios.post(
+        `${API_BASE_URL}/courses/progress/track-video-progress`,
+        { 
+          courseId, 
+          videoId, 
+          progressPercent 
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const updatedProgress = response.data;
+      setProgress(updatedProgress.progress);
+      setVideoProgress(updatedProgress.videoProgress);
+      setCompletedVideos(updatedProgress.completedVideos);
+      setCompletedCount(updatedProgress.completedCount);
+      
+      // Show progress toast
+      if (progressPercent === 100 && !completedVideos.includes(videoId)) {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
+        
+        toast.success(
+          <div className="flex flex-col items-center">
+            <div className="text-xl font-bold mb-1">🎉 Congratulations! 🎉</div>
+            <div>Video completed!</div>
+            <div className="text-sm mt-1">Overall Progress: {updatedProgress.progress}%</div>
+            <div className="text-xs mt-1">
+              {updatedProgress.completedCount} of {updatedProgress.totalVideos} videos completed
+            </div>
+          </div>,
+          {
+            position: "top-center",
+            autoClose: 4000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            className: "completion-toast",
+            icon: "🏆"
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Error updating video progress:', error);
+      toast.error('Failed to update progress', {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
     }
   };
 
