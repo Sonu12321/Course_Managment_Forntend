@@ -86,7 +86,8 @@ function CourseDetails() {
         progress: progressData.progress || 0,
         completedVideos: progressData.completedVideos || [],
         totalVideos: progressData.totalVideos || 0,
-        completedCount: progressData.completedCount || 0
+        completedCount: progressData.completedCount || 0,
+        completionStatus: progressData.completionStatus || 'not-started'
       }));
     } catch (error) {
       console.error('Error fetching course progress:', error);
@@ -117,14 +118,17 @@ function CourseDetails() {
       const updatedProgress = response.data;
       setProgress(updatedProgress.progress);
       setCompletedVideos(updatedProgress.completedVideos);
-      setCompletedCount(updatedProgress.completedVideos.length);
+      setCompletedCount(updatedProgress.completedCount);
+      setTotalVideos(updatedProgress.totalVideos);
       
       // Update course with new progress data
       setCourse(prevCourse => ({
         ...prevCourse,
         progress: updatedProgress.progress,
         completedVideos: updatedProgress.completedVideos,
-        completedCount: updatedProgress.completedVideos.length
+        completedCount: updatedProgress.completedCount,
+        totalVideos: updatedProgress.totalVideos,
+        completionStatus: updatedProgress.completionStatus
       }));
 
       // Show confetti effect
@@ -137,6 +141,9 @@ function CourseDetails() {
           <div className="text-xl font-bold mb-1">🎉 Congratulations! 🎉</div>
           <div>Video marked as completed!</div>
           <div className="text-sm mt-1">Progress: {updatedProgress.progress}%</div>
+          <div className="text-xs mt-1">
+            {updatedProgress.completedCount} of {updatedProgress.totalVideos} videos completed
+          </div>
         </div>,
         {
           position: "top-center",
