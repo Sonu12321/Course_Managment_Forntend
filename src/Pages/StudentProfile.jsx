@@ -18,6 +18,8 @@ const StudentProfile = () => {
     const [activeTab, setActiveTab] = useState('profile');
     const [enrolledCourses, setEnrolledCourses] = useState([]);
     const [pendingInstallments, setPendingInstallments] = useState([]);
+    // Add new state for course progress
+    const [courseProgress, setCourseProgress] = useState({});
     const [profile, setProfile] = useState({
         firstName: '',
         lastName: '',
@@ -74,6 +76,25 @@ const StudentProfile = () => {
         }
     };
 
+    const fetchCourseProgress = async (courseId) => {
+        try {
+            const response = await axios.get(
+                `https://course-creation-backend.onrender.com/api/progress/course/${courseId}`,
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            if (response.data.success) {
+                return response.data.progress;
+            }
+            return null;
+        } catch (error) {
+            console.error(`Error fetching progress for course ${courseId}:`, error);
+            return null;
+        }
+    };
+
     const fetchEnrolledCourses = async () => {
         try {
             const response = await axios.get('https://course-creation-backend.onrender.com/api/students/enrolled-courses', {
@@ -81,7 +102,18 @@ const StudentProfile = () => {
             });
             
             if (response.data.success) {
-                setEnrolledCourses(response.data.courses || []);
+                const courses = response.data.courses || [];
+                setEnrolledCourses(courses);
+                
+                // Fetch progress for each course
+                const progressData = {};
+                for (const course of courses) {
+                    const progress = await fetchCourseProgress(course.courseId);
+                    if (progress) {
+                        progressData[course.courseId] = progress;
+                    }
+                }
+                setCourseProgress(progressData);
             } else {
                 console.error("Failed to fetch enrolled courses");
             }
@@ -262,7 +294,7 @@ const StudentProfile = () => {
         </div>
     );
 
-    // Render the courses tab content with enhanced styling
+    // Render the courses tab content with enhanced styling and progress tracking
     const renderCoursesTab = () => (
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
             <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
@@ -288,54 +320,86 @@ const StudentProfile = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {enrolledCourses.map((course) => (
-                            <div key={course.courseId} className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col">
-                                <div className="h-40 bg-gradient-to-r from-blue-400 to-indigo-500 relative overflow-hidden">
-                                    {course.courseDetails?.thumbnail && (
-                                        <img 
-                                            src={course.courseDetails.thumbnail} 
-                                            alt={course.courseDetails?.title || 'Course'} 
-                                            className="w-full h-full object-cover opacity-90"
-                                        />
-                                    )}
-                                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
-                                        <h3 className="font-semibold text-lg text-white truncate">
-                                            {course.courseDetails?.title || 'Course Title'}
-                                        </h3>
+                        {enrolledCourses.map((course) => {
+                            const progress = courseProgress[course.courseId];
+                            const completionPercentage = progress ? progress.completionPercentage || 0 : 0;
+                            const isCompleted = completionPercentage >= 100 || course.status === 'completed';
+                            
+                            return (
+                                <div key={course.courseId} className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col">
+                                    <div className="h-40 bg-gradient-to-r from-blue-400 to-indigo-500 relative overflow-hidden">
+                                        {course.courseDetails?.thumbnail && (
+                                            <img 
+                                                src={course.courseDetails.thumbnail} 
+                                                alt={course.courseDetails?.title || 'Course'} 
+                                                className="w-full h-full object-cover opacity-90"
+                                            />
+                                        )}
+                                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
+                                            <h3 className="font-semibold text-lg text-white truncate">
+                                                {course.courseDetails?.title || 'Course Title'}
+                                            </h3>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="p-4 flex-grow">
-                                    <div className="flex justify-between items-center text-sm text-gray-500 mb-3">
-                                        <span className="flex items-center">
-                                            <FaCalendarAlt className="mr-1 text-blue-500" /> 
-                                            {formatDate(course.enrollmentDate)}
-                                        </span>
-                                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                            course.status === 'completed' 
+                                    <div className="p-4 flex-grow">
+                                        <div className="flex justify-between items-center text-sm text-gray-500 mb-3">
+                                            <span className="flex items-center">
+                                                <FaCalendarAlt className="mr-1 text-blue-500" /> 
+                                                {formatDate(course.enrollmentDate)}
+                                            </span>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${isCompleted 
                                                 ? 'bg-green-100 text-green-800' 
                                                 : 'bg-blue-100 text-blue-800'
-                                        }`}>
-                                            {course.status === 'completed' ? (
-                                                <span className="flex items-center">
-                                                    <FaCheckCircle className="mr-1" /> Completed
-                                                </span>
-                                            ) : 'Active'}
-                                        </span>
+                                            }`}>
+                                                {isCompleted ? (
+                                                    <span className="flex items-center">
+                                                        <FaCheckCircle className="mr-1" /> Completed
+                                                    </span>
+                                                ) : 'In Progress'}
+                                            </span>
+                                        </div>
+                                        
+                                        {/* Progress Bar */}
+                                        <div className="mb-4">
+                                            <div className="flex mb-1 items-center justify-between">
+                                                <div>
+                                                    <span className="text-xs font-medium text-gray-500">Progress</span>
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className="text-xs font-medium text-gray-700">
+                                                        {completionPercentage.toFixed(1)}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+                                                <div 
+                                                    style={{ width: `${completionPercentage}%` }} 
+                                                    className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-500 ease-in-out ${isCompleted ? 'bg-green-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'}`}
+                                                ></div>
+                                            </div>
+                                        </div>
+                                        
+                                        {progress && (
+                                            <div className="text-xs text-gray-600 mb-4">
+                                                <span className="font-medium">{progress.watchedVideos?.length || 0}</span> of <span className="font-medium">{progress.totalVideos || 0}</span> videos completed
+                                            </div>
+                                        )}
+                                        
+                                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                                            {course.courseDetails?.subtitle || 'Continue your learning journey with this course.'}
+                                        </p>
                                     </div>
-                                    <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                                        {course.courseDetails?.subtitle || 'Continue your learning journey with this course.'}
-                                    </p>
+                                    <div className="p-4 pt-0 mt-auto">
+                                        <Button 
+                                            onClick={() => navigate(`/course/${course.courseId}`)}
+                                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                                        >
+                                            {isCompleted ? 'Review Course' : 'Continue Learning'}
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="p-4 pt-0 mt-auto">
-                                    <Button 
-                                        onClick={() => navigate(`/course/${course.courseId}`)}
-                                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
-                                    >
-                                        Continue Learning
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </div>
