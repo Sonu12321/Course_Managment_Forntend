@@ -6,6 +6,59 @@ import { InputBox, Button } from '../Components/Contianer';
 import { FaGraduationCap, FaCreditCard, FaUser, FaEdit, FaCamera, FaBook, FaCalendarAlt, FaCheckCircle } from 'react-icons/fa';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+// Import Material UI components
+import { 
+    Card, CardContent, CardMedia, CardActions, 
+    Typography, Box, Chip, LinearProgress, 
+    Collapse, IconButton, Avatar, Grid, Paper, 
+    Divider, Tabs, Tab, Badge
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SchoolIcon from '@mui/icons-material/School';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+
+// Styled components for Material UI
+const ExpandMore = styled((props) => {
+    const { expand, ...other } = props;
+    return <IconButton {...other} />;
+})(({ theme, expand }) => ({
+    transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+    marginLeft: 'auto',
+    transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.shortest,
+    }),
+}));
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+    '& .MuiBadge-badge': {
+        backgroundColor: '#44b700',
+        color: '#44b700',
+        boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+        '&::after': {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            animation: 'ripple 1.2s infinite ease-in-out',
+            border: '1px solid currentColor',
+            content: '""',
+        },
+    },
+    '@keyframes ripple': {
+        '0%': {
+            transform: 'scale(.8)',
+            opacity: 1,
+        },
+        '100%': {
+            transform: 'scale(2.4)',
+            opacity: 0,
+        },
+    },
+}));
 
 const StudentProfile = () => {
     const navigate = useNavigate();
@@ -25,6 +78,8 @@ const StudentProfile = () => {
         lastName: '',
         profileImage: null,
     });
+    // State for expanded cards
+    const [expanded, setExpanded] = useState({});
 
     useEffect(() => {
         if (!token) {
@@ -102,12 +157,16 @@ const StudentProfile = () => {
             });
             
             if (response.data.success) {
-                const courses = response.data.courses || [];
-                setEnrolledCourses(courses);
+                // Ensure we have unique courses by courseId
+                const uniqueCourses = Array.from(
+                    new Map(response.data.courses.map(course => [course.courseId, course]))
+                ).map(([_, course]) => course);
+                
+                setEnrolledCourses(uniqueCourses);
                 
                 // Fetch progress for each course
                 const progressData = {};
-                for (const course of courses) {
+                for (const course of uniqueCourses) {
                     const progress = await fetchCourseProgress(course.courseId);
                     if (progress) {
                         progressData[course.courseId] = progress;
@@ -199,54 +258,103 @@ const StudentProfile = () => {
         return new Date(dateString).toLocaleDateString(undefined, options);
     };
 
+    // Handle card expansion
+    const handleExpandClick = (courseId) => {
+        setExpanded(prev => ({
+            ...prev,
+            [courseId]: !prev[courseId]
+        }));
+    };
+
     // Render the profile tab content with enhanced styling
     const renderProfileTab = () => (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 h-32"></div>
+        <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+            <Box sx={{ 
+                height: '120px', 
+                background: 'linear-gradient(90deg, #3f51b5 0%, #2196f3 100%)' 
+            }}/>
             
-            {/* Profile Image Section - Repositioned for better visual appeal */}
-            <div className="relative px-6">
-                <div 
-                    className="w-32 h-32 rounded-full bg-white border-4 border-white overflow-hidden cursor-pointer absolute -top-16 shadow-lg"
+            {/* Profile Image Section */}
+            <Box sx={{ position: 'relative', px: 3 }}>
+                <Box 
                     onClick={handleImageClick}
+                    sx={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: '50%',
+                        bgcolor: 'white',
+                        border: '4px solid white',
+                        overflow: 'hidden',
+                        position: 'absolute',
+                        top: -60,
+                        boxShadow: 3,
+                        cursor: 'pointer',
+                        '&:hover .overlay': {
+                            opacity: 0.7
+                        }
+                    }}
                 >
                     {imagePreview ? (
                         <img 
                             src={imagePreview} 
                             alt="Profile" 
-                            className="w-full h-full object-cover"
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                            <FaUser className="text-gray-400 text-4xl" />
-                        </div>
+                        <Box sx={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            bgcolor: 'grey.100'
+                        }}>
+                            <FaUser style={{ fontSize: '2.5rem', color: '#9e9e9e' }} />
+                        </Box>
                     )}
-                    <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all flex items-center justify-center">
-                        <FaCamera className="text-white opacity-0 hover:opacity-100 text-xl" />
-                    </div>
-                </div>
+                    <Box className="overlay" sx={{
+                        position: 'absolute',
+                        inset: 0,
+                        bgcolor: 'black',
+                        opacity: 0,
+                        transition: 'opacity 0.3s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <FaCamera style={{ color: 'white', fontSize: '1.5rem' }} />
+                    </Box>
+                </Box>
                 
                 {showImageInput && (
-                    <div className="mt-20 mb-4 max-w-md">
-                        <div className="p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <Box sx={{ mt: 10, mb: 2, maxWidth: 'md' }}>
+                        <Box sx={{ p: 2, border: '1px solid', borderColor: 'grey.200', borderRadius: 1, bgcolor: 'grey.50' }}>
                             <input
                                 type="file"
                                 onChange={handleImageChange}
                                 accept="image/*"
-                                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                style={{
+                                    width: '100%',
+                                    fontSize: '0.875rem',
+                                    color: 'grey.500'
+                                }}
                             />
-                        </div>
-                    </div>
+                        </Box>
+                    </Box>
                 )}
-            </div>
+            </Box>
 
-            <div className="p-8 pt-20">
-                <h2 className="text-2xl font-bold text-gray-800 mb-6">Personal Information</h2>
+            <Box sx={{ p: 4, pt: 10 }}>
+                <Typography variant="h5" fontWeight="bold" color="text.primary" mb={3}>
+                    Personal Information
+                </Typography>
                 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <form onSubmit={handleSubmit}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                            <Typography variant="subtitle2" mb={1}>
+                                First Name
+                            </Typography>
                             <InputBox
                                 value={profile.firstName}
                                 onChange={(e) => setProfile({ ...profile, firstName: e.target.value })}
@@ -254,10 +362,12 @@ const StudentProfile = () => {
                                 className="w-full focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter your first name"
                             />
-                        </div>
+                        </Grid>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <Grid item xs={12} md={6}>
+                            <Typography variant="subtitle2" mb={1}>
+                                Last Name
+                            </Typography>
                             <InputBox
                                 value={profile.lastName}
                                 onChange={(e) => setProfile({ ...profile, lastName: e.target.value })}
@@ -265,167 +375,268 @@ const StudentProfile = () => {
                                 className="w-full focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter your last name"
                             />
-                        </div>
-                    </div>
+                        </Grid>
 
-                    <div className="pt-4">
-                        <Button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
-                        >
-                            {loading ? (
-                                <span className="flex items-center justify-center">
-                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Updating Profile...
-                                </span>
-                            ) : (
-                                <span className="flex items-center justify-center">
-                                    <FaEdit className="mr-2" /> Update Profile
-                                </span>
-                            )}
-                        </Button>
-                    </div>
+                        <Grid item xs={12} mt={2}>
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                            >
+                                {loading ? (
+                                    <span className="flex items-center justify-center">
+                                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Updating Profile...
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center justify-center">
+                                        <FaEdit className="mr-2" /> Update Profile
+                                    </span>
+                                )}
+                            </Button>
+                        </Grid>
+                    </Grid>
                 </form>
-            </div>
-        </div>
+            </Box>
+        </Paper>
     );
 
-    // Render the courses tab content with enhanced styling and progress tracking
+    // Render the courses tab content with Material UI cards
     const renderCoursesTab = () => (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                    <FaBook className="mr-3 text-blue-600" /> My Enrolled Courses
-                </h2>
-            </div>
+        <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+            <Box sx={{ 
+                p: 3, 
+                borderBottom: '1px solid', 
+                borderColor: 'divider',
+                background: 'linear-gradient(90deg, #e3f2fd 0%, #e8eaf6 100%)'
+            }}>
+                <Typography variant="h5" fontWeight="bold" color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+                    <FaBook style={{ marginRight: '0.75rem', color: '#3f51b5' }} /> My Enrolled Courses
+                </Typography>
+            </Box>
             
-            <div className="p-6">
+            <Box sx={{ p: 3 }}>
                 {enrolledCourses.length === 0 ? (
-                    <div className="text-center py-16 px-4">
-                        <div className="bg-blue-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                            <FaGraduationCap className="text-4xl text-blue-500" />
-                        </div>
-                        <h3 className="text-xl font-medium text-gray-800 mb-2">No Courses Yet</h3>
-                        <p className="text-gray-500 mb-6 max-w-md mx-auto">You haven't enrolled in any courses yet. Browse our catalog to find courses that match your interests.</p>
+                    <Box sx={{ textAlign: 'center', py: 8, px: 2 }}>
+                        <Avatar sx={{ 
+                            width: 80, 
+                            height: 80, 
+                            bgcolor: '#e3f2fd', 
+                            mx: 'auto', 
+                            mb: 2 
+                        }}>
+                            <SchoolIcon sx={{ fontSize: 40, color: '#2196f3' }} />
+                        </Avatar>
+                        <Typography variant="h6" color="text.primary" mb={1}>
+                            No Courses Yet
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary" mb={3} sx={{ maxWidth: 400, mx: 'auto' }}>
+                            You haven't enrolled in any courses yet. Browse our catalog to find courses that match your interests.
+                        </Typography>
                         <Button 
                             onClick={() => navigate('/courses')}
                             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
                         >
                             Browse Courses
                         </Button>
-                    </div>
+                    </Box>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <Grid container spacing={3}>
                         {enrolledCourses.map((course) => {
                             const progress = courseProgress[course.courseId];
                             const completionPercentage = progress ? progress.completionPercentage || 0 : 0;
                             const isCompleted = completionPercentage >= 100 || course.status === 'completed';
                             
                             return (
-                                <div key={course.courseId} className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col">
-                                    <div className="h-40 bg-gradient-to-r from-blue-400 to-indigo-500 relative overflow-hidden">
-                                        {course.courseDetails?.thumbnail && (
-                                            <img 
-                                                src={course.courseDetails.thumbnail} 
-                                                alt={course.courseDetails?.title || 'Course'} 
-                                                className="w-full h-full object-cover opacity-90"
+                                <Grid item xs={12} sm={6} md={4} key={course.courseId}>
+                                    <Card 
+                                        sx={{ 
+                                            height: '100%', 
+                                            display: 'flex', 
+                                            flexDirection: 'column',
+                                            transition: 'transform 0.3s, box-shadow 0.3s',
+                                            '&:hover': {
+                                                transform: 'translateY(-4px)',
+                                                boxShadow: 6
+                                            }
+                                        }}
+                                    >
+                                        <CardMedia
+                                            component="img"
+                                            height="140"
+                                            image={course.courseDetails?.thumbnail || 'https://via.placeholder.com/300x140?text=Course'}
+                                            alt={course.courseDetails?.title || 'Course'}
+                                            sx={{ 
+                                                position: 'relative',
+                                                '&::after': {
+                                                    content: '""',
+                                                    position: 'absolute',
+                                                    bottom: 0,
+                                                    left: 0,
+                                                    right: 0,
+                                                    height: '50%',
+                                                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)'
+                                                }
+                                            }}
+                                        />
+                                        
+                                        <Box sx={{ position: 'relative', mt: -6, px: 2, zIndex: 1 }}>
+                                            <Chip
+                                                label={isCompleted ? 'Completed' : 'In Progress'}
+                                                color={isCompleted ? 'success' : 'primary'}
+                                                size="small"
+                                                icon={isCompleted ? <FaCheckCircle /> : undefined}
+                                                sx={{ fontWeight: 'medium' }}
                                             />
-                                        )}
-                                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/70 to-transparent">
-                                            <h3 className="font-semibold text-lg text-white truncate">
+                                        </Box>
+                                        
+                                        <CardContent sx={{ flexGrow: 1, pt: 1 }}>
+                                            <Typography variant="h6" component="div" gutterBottom noWrap>
                                                 {course.courseDetails?.title || 'Course Title'}
-                                            </h3>
-                                        </div>
-                                    </div>
-                                    <div className="p-4 flex-grow">
-                                        <div className="flex justify-between items-center text-sm text-gray-500 mb-3">
-                                            <span className="flex items-center">
-                                                <FaCalendarAlt className="mr-1 text-blue-500" /> 
-                                                {formatDate(course.enrollmentDate)}
-                                            </span>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${isCompleted 
-                                                ? 'bg-green-100 text-green-800' 
-                                                : 'bg-blue-100 text-blue-800'
-                                            }`}>
-                                                {isCompleted ? (
-                                                    <span className="flex items-center">
-                                                        <FaCheckCircle className="mr-1" /> Completed
-                                                    </span>
-                                                ) : 'In Progress'}
-                                            </span>
-                                        </div>
-                                        
-                                        {/* Progress Bar */}
-                                        <div className="mb-4">
-                                            <div className="flex mb-1 items-center justify-between">
-                                                <div>
-                                                    <span className="text-xs font-medium text-gray-500">Progress</span>
-                                                </div>
-                                                <div className="text-right">
-                                                    <span className="text-xs font-medium text-gray-700">
+                                            </Typography>
+                                            
+                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, color: 'text.secondary' }}>
+                                                <AccessTimeIcon sx={{ fontSize: 16, mr: 0.5 }} />
+                                                <Typography variant="body2">
+                                                    {formatDate(course.enrollmentDate)}
+                                                </Typography>
+                                            </Box>
+                                            
+                                            <Box sx={{ mb: 2 }}>
+                                                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Progress
+                                                    </Typography>
+                                                    <Typography variant="body2" fontWeight="medium">
                                                         {completionPercentage.toFixed(1)}%
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
-                                                <div 
-                                                    style={{ width: `${completionPercentage}%` }} 
-                                                    className={`shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-500 ease-in-out ${isCompleted ? 'bg-green-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'}`}
-                                                ></div>
-                                            </div>
-                                        </div>
+                                                    </Typography>
+                                                </Box>
+                                                <LinearProgress 
+                                                    variant="determinate" 
+                                                    value={completionPercentage} 
+                                                    color={isCompleted ? 'success' : 'primary'}
+                                                    sx={{ height: 6, borderRadius: 3 }}
+                                                />
+                                            </Box>
+                                            
+                                            {progress && (
+                                                <Typography variant="body2" color="text.secondary" mb={2}>
+                                                    <b>{progress.watchedVideos?.length || 0}</b> of <b>{progress.totalVideos || 0}</b> videos completed
+                                                </Typography>
+                                            )}
+                                            
+                                            <Typography variant="body2" color="text.secondary" sx={{
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                                mb: 2
+                                            }}>
+                                                {course.courseDetails?.subtitle || 'Continue your learning journey with this course.'}
+                                            </Typography>
+                                        </CardContent>
                                         
-                                        {progress && (
-                                            <div className="text-xs text-gray-600 mb-4">
-                                                <span className="font-medium">{progress.watchedVideos?.length || 0}</span> of <span className="font-medium">{progress.totalVideos || 0}</span> videos completed
-                                            </div>
-                                        )}
+                                        <CardActions disableSpacing>
+                                            <Button 
+                                                onClick={() => navigate(`/course/${course.courseId}`)}
+                                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                                                startIcon={isCompleted ? <FaCheckCircle /> : <PlayArrowIcon />}
+                                            >
+                                                {isCompleted ? 'Review Course' : 'Continue Learning'}
+                                            </Button>
+                                            <ExpandMore
+                                                expand={expanded[course.courseId] || false}
+                                                onClick={() => handleExpandClick(course.courseId)}
+                                                aria-expanded={expanded[course.courseId] || false}
+                                                aria-label="show more"
+                                            >
+                                                <ExpandMoreIcon />
+                                            </ExpandMore>
+                                        </CardActions>
                                         
-                                        <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                                            {course.courseDetails?.subtitle || 'Continue your learning journey with this course.'}
-                                        </p>
-                                    </div>
-                                    <div className="p-4 pt-0 mt-auto">
-                                        <Button 
-                                            onClick={() => navigate(`/course/${course.courseId}`)}
-                                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
-                                        >
-                                            {isCompleted ? 'Review Course' : 'Continue Learning'}
-                                        </Button>
-                                    </div>
-                                </div>
+                                        <Collapse in={expanded[course.courseId] || false} timeout="auto" unmountOnExit>
+                                            <CardContent>
+                                                <Typography variant="subtitle1" gutterBottom fontWeight="medium">
+                                                    Course Details
+                                                </Typography>
+                                                <Divider sx={{ mb: 2 }} />
+                                                
+                                                {course.courseDetails?.description && (
+                                                    <Typography paragraph>
+                                                        {course.courseDetails.description}
+                                                    </Typography>
+                                                )}
+                                                
+                                                {course.courseDetails?.instructor && (
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
+                                                        <Avatar 
+                                                            src={course.courseDetails.instructorImage || undefined} 
+                                                            alt={course.courseDetails.instructor}
+                                                            sx={{ width: 32, height: 32, mr: 1 }}
+                                                        />
+                                                        <Typography variant="body2">
+                                                            Instructor: <b>{course.courseDetails.instructor}</b>
+                                                        </Typography>
+                                                    </Box>
+                                                )}
+                                                
+                                                {course.courseDetails?.category && (
+                                                    <Chip 
+                                                        label={course.courseDetails.category} 
+                                                        size="small" 
+                                                        sx={{ mt: 2 }}
+                                                    />
+                                                )}
+                                            </CardContent>
+                                        </Collapse>
+                                    </Card>
+                                </Grid>
                             );
                         })}
-                    </div>
+                    </Grid>
                 )}
-            </div>
-        </div>
+            </Box>
+        </Paper>
     );
 
     // Render the payments tab content with enhanced styling
     const renderPaymentsTab = () => (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                    <FaCreditCard className="mr-3 text-blue-600" /> Pending Payments
-                </h2>
-            </div>
+        <Paper elevation={3} sx={{ borderRadius: 3, overflow: 'hidden' }}>
+            <Box sx={{ 
+                p: 3, 
+                borderBottom: '1px solid', 
+                borderColor: 'divider',
+                background: 'linear-gradient(90deg, #e3f2fd 0%, #e8eaf6 100%)'
+            }}>
+                <Typography variant="h5" fontWeight="bold" color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
+                    <FaCreditCard style={{ marginRight: '0.75rem', color: '#3f51b5' }} /> Pending Payments
+                </Typography>
+            </Box>
             
-            <div className="p-6">
+            <Box sx={{ p: 3 }}>
                 {pendingInstallments.length === 0 ? (
-                    <div className="text-center py-16 px-4">
-                        <div className="bg-green-50 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                            <FaCheckCircle className="text-4xl text-green-500" />
-                        </div>
-                        <h3 className="text-xl font-medium text-gray-800 mb-2">All Payments Completed</h3>
-                        <p className="text-gray-500 max-w-md mx-auto">You don't have any pending payments at the moment.</p>
-                    </div>
+                    <Box sx={{ textAlign: 'center', py: 8, px: 2 }}>
+                        <Avatar sx={{ 
+                            width: 80, 
+                            height: 80, 
+                            bgcolor: '#e8f5e9', 
+                            mx: 'auto', 
+                            mb: 2 
+                        }}>
+                            <FaCheckCircle style={{ fontSize: 40, color: '#4caf50' }} />
+                        </Avatar>
+                        <Typography variant="h6" color="text.primary" mb={1}>
+                            All Payments Completed
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400, mx: 'auto' }}>
+                            You don't have any pending payments at the moment.
+                        </Typography>
+                    </Box>
                 ) : (
-                    <div className="overflow-x-auto rounded-lg border border-gray-200">
+                    <Box sx={{ overflowX: 'auto' }}>
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
@@ -480,14 +691,14 @@ const StudentProfile = () => {
                                 ))}
                             </tbody>
                         </table>
-                    </div>
+                    </Box>
                 )}
-            </div>
-        </div>
+            </Box>
+        </Paper>
     );
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5', py: 6, px: 2 }}>
             <ToastContainer 
                 position="top-right" 
                 autoClose={5000} 
@@ -501,93 +712,128 @@ const StudentProfile = () => {
                 theme="light"
             />
             
-            <div className="max-w-6xl mx-auto">
-                <h1 className="text-3xl font-bold text-center mb-2">Student Dashboard</h1>
-                <p className="text-gray-500 text-center mb-8">Manage your profile, courses, and payments</p>
+            <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
+                <Typography variant="h4" fontWeight="bold" textAlign="center" mb={1}>
+                    Student Dashboard
+                </Typography>
+                <Typography variant="body1" color="text.secondary" textAlign="center" mb={4}>
+                    Manage your profile, courses, and payments
+                </Typography>
                 
                 {error && (
-                    <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6 flex items-start">
-                        <div className="flex-shrink-0 mt-0.5">
-                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <Box sx={{ 
+                        bgcolor: '#ffebee', 
+                        borderLeft: '4px solid #f44336',
+                        color: '#c62828',
+                        p: 2,
+                        borderRadius: 1,
+                        mb: 3,
+                        display: 'flex',
+                        alignItems: 'flex-start'
+                    }}>
+                        <Box sx={{ mt: 0.5, mr: 1.5 }}>
+                            <svg style={{ height: 20, width: 20 }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                             </svg>
-                        </div>
-                        <div className="ml-3">
-                            <p className="text-sm">{error}</p>
-                        </div>
-                    </div>
+                        </Box>
+                        <Typography variant="body2">{error}</Typography>
+                    </Box>
                 )}
                 
                 {success && (
-                    <div className="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6 flex items-start">
-                        <div className="flex-shrink-0 mt-0.5">
-                            <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <Box sx={{ 
+                        bgcolor: '#e8f5e9', 
+                        borderLeft: '4px solid #4caf50',
+                        color: '#2e7d32',
+                        p: 2,
+                        borderRadius: 1,
+                        mb: 3,
+                        display: 'flex',
+                        alignItems: 'flex-start'
+                    }}>
+                        <Box sx={{ mt: 0.5, mr: 1.5 }}>
+                            <svg style={{ height: 20, width: 20 }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                             </svg>
-                        </div>
-                        <div className="ml-3">
-                            <p className="text-sm">{success}</p>
-                        </div>
-                    </div>
+                        </Box>
+                        <Typography variant="body2">{success}</Typography>
+                    </Box>
                 )}
 
-                {/* Dashboard Tabs - Enhanced with better styling */}
-                <div className="bg-white rounded-xl shadow-sm mb-6 p-1">
-                    <div className="flex flex-wrap">
-                        <button
-                            className={`flex items-center px-6 py-3 font-medium text-sm rounded-lg transition-all duration-200 ${
-                                activeTab === 'profile' 
-                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700' 
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setActiveTab('profile')}
-                        >
-                            <FaUser className={`mr-2 ${activeTab === 'profile' ? 'text-blue-600' : 'text-gray-400'}`} /> 
-                            Profile
-                        </button>
-                        <button
-                            className={`flex items-center px-6 py-3 font-medium text-sm rounded-lg transition-all duration-200 ${
-                                activeTab === 'courses' 
-                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700' 
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setActiveTab('courses')}
-                        >
-                            <FaGraduationCap className={`mr-2 ${activeTab === 'courses' ? 'text-blue-600' : 'text-gray-400'}`} /> 
-                            My Courses
-                            {enrolledCourses.length > 0 && (
-                                <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                                    {enrolledCourses.length}
-                                </span>
-                            )}
-                        </button>
-                        <button
-                            className={`flex items-center px-6 py-3 font-medium text-sm rounded-lg transition-all duration-200 ${
-                                activeTab === 'payments' 
-                                    ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700' 
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                            }`}
-                            onClick={() => setActiveTab('payments')}
-                        >
-                            <FaCreditCard className={`mr-2 ${activeTab === 'payments' ? 'text-blue-600' : 'text-gray-400'}`} /> 
-                            Payments
-                            {pendingInstallments.length > 0 && (
-                                <span className="ml-2 bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                                    {pendingInstallments.length}
-                                </span>
-                            )}
-                        </button>
-                    </div>
-                </div>
+                {/* Dashboard Tabs - Material UI styled */}
+                <Paper elevation={1} sx={{ borderRadius: 3, mb: 3, p: 0.5 }}>
+                    <Tabs
+                        value={activeTab}
+                        onChange={(_, newValue) => setActiveTab(newValue)}
+                        variant="fullWidth"
+                        indicatorColor="primary"
+                        textColor="primary"
+                        sx={{ 
+                            '& .MuiTab-root': {
+                                minHeight: 48,
+                                borderRadius: 2,
+                                fontWeight: 500,
+                                transition: 'all 0.2s',
+                                '&.Mui-selected': {
+                                    background: 'linear-gradient(90deg, #e3f2fd 0%, #e8eaf6 100%)',
+                                }
+                            }
+                        }}
+                    >
+                        <Tab 
+                            value="profile" 
+                            label={
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <FaUser style={{ marginRight: 8, fontSize: 16 }} />
+                                    Profile
+                                </Box>
+                            }
+                        />
+                        <Tab 
+                            value="courses" 
+                            label={
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <FaGraduationCap style={{ marginRight: 8, fontSize: 16 }} />
+                                    My Courses
+                                    {enrolledCourses.length > 0 && (
+                                        <Chip 
+                                            label={enrolledCourses.length} 
+                                            size="small" 
+                                            color="primary" 
+                                            sx={{ ml: 1, height: 20, minWidth: 20 }}
+                                        />
+                                    )}
+                                </Box>
+                            }
+                        />
+                        <Tab 
+                            value="payments" 
+                            label={
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <FaCreditCard style={{ marginRight: 8, fontSize: 16 }} />
+                                    Payments
+                                    {pendingInstallments.length > 0 && (
+                                        <Chip 
+                                            label={pendingInstallments.length} 
+                                            size="small" 
+                                            color="error" 
+                                            sx={{ ml: 1, height: 20, minWidth: 20 }}
+                                        />
+                                    )}
+                                </Box>
+                            }
+                        />
+                    </Tabs>
+                </Paper>
 
                 {/* Tab Content */}
-                <div className="mt-6">
+                <Box sx={{ mt: 3 }}>
                     {activeTab === 'profile' && renderProfileTab()}
                     {activeTab === 'courses' && renderCoursesTab()}
                     {activeTab === 'payments' && renderPaymentsTab()}
-                </div>
-            </div>
-        </div>
+                </Box>
+            </Box>
+        </Box>
     );
 };
 

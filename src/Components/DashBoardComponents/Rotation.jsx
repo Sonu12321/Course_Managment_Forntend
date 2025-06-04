@@ -1,37 +1,91 @@
 import React, { useState, useEffect, useRef } from 'react';
-import img1 from '../../public/Rotate/one.webp';
-import img2 from '../../public/Rotate/two.webp';
-import img3 from '../../public/Rotate/three.webp';
-import img4 from '../../public/Rotate/four.webp';
-import img5 from '../../public/Rotate/five.webp';
-import img6 from '../../public/Rotate/six.webp';
-import img7 from '../../public/Rotate/seven.webp';
-import img8 from '../../public/Rotate/eight.webp';
-import img9 from '../../public/Rotate/nine.webp';
-// import img2 from '../public/Rotate/two.webp';
-// import img3 from '../public/Rotate/three.webp';
-// import img4 from '../public/Rotate/four.webp';
-// import img5 from '../public/Rotate/five.webp';
-// import img6 from '../public/Rotate/six.webp';
-// import img7 from '../public/Rotate/seven.webp';
-// import img8 from '../public/Rotate/eight.webp';
-// import img9 from '../public/Rotate/nine.webp';
+import { Card, CardContent } from '@/components/ui/card';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Star, Quote } from 'lucide-react';
+
+// You can replace these with your actual images
+const courseImages = [
+  'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=300&fit=crop',
+  'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop',
+];
+
+const courseTitles = [
+  "Full-Stack Web Development",
+  "UI/UX Design Fundamentals", 
+  "Python for Data Science",
+  "Machine Learning with Python",
+  "React & Redux Bootcamp",
+  "Cybersecurity Essentials",
+  "Cloud Computing with AWS",
+  "Digital Marketing Strategy",
+  "Blockchain Basics"
+];
+
+const instructors = [
+  "Sarah Johnson", "Mike Chen", "Dr. Emily Davis", "Alex Rodriguez", 
+  "Jessica Kim", "David Thompson", "Maria Garcia", "James Wilson", "Lisa Anderson"
+];
+
+const studentReviews = [
+  {
+    name: "Alex Thompson",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    course: "Full-Stack Web Development",
+    rating: 5,
+    review: "This course completely transformed my career! The hands-on projects and expert guidance helped me land my dream job as a software developer.",
+    achievement: "Now working at Google"
+  },
+  {
+    name: "Priya Patel",
+    avatar: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+    course: "UI/UX Design Fundamentals",
+    rating: 5,
+    review: "The design principles I learned here are invaluable. The instructor's feedback was detailed and helped me build an amazing portfolio.",
+    achievement: "Freelancing successfully"
+  },
+  {
+    name: "Marcus Johnson",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    course: "Python for Data Science",
+    rating: 5,
+    review: "From zero to data scientist! The course structure is perfect for beginners, and the real-world projects gave me confidence.",
+    achievement: "Data Analyst at Microsoft"
+  },
+  {
+    name: "Emma Rodriguez",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    course: "Digital Marketing Strategy",
+    rating: 5,
+    review: "Incredible ROI on this investment! I've increased my client's revenue by 300% using the strategies taught in this course.",
+    achievement: "Marketing Director"
+  },
+  {
+    name: "James Park",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    course: "Machine Learning with Python",
+    rating: 5,
+    review: "The complex concepts were explained so clearly. I'm now building ML models for my company and leading AI initiatives.",
+    achievement: "ML Engineer at Tesla"
+  },
+  {
+    name: "Sophie Chen",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    course: "Cybersecurity Essentials",
+    rating: 5,
+    review: "Security is more important than ever. This course gave me the skills to protect businesses and pursue my passion for cybersecurity.",
+    achievement: "Security Analyst"
+  }
+];
 
 export default function Rotation() {
-  const images = [img1, img2, img3, img4, img5, img6, img7, img8, img9];
-
-  const courseTitles = [
-    "Full-Stack Web Development",
-    "UI/UX Design Fundamentals",
-    "Python for Data Science",
-    "Machine Learning with Python",
-    "React & Redux Bootcamp",
-    "Cybersecurity Essentials",
-    "Cloud Computing with AWS",
-    "Digital Marketing Strategy",
-    "Blockchain Basics"
-  ];
-
   const [isHovered, setIsHovered] = useState(false);
   const [isTouching, setIsTouching] = useState(false);
   const carouselRef = useRef(null);
@@ -46,86 +100,171 @@ export default function Rotation() {
     if (container.scrollLeft >= scrollWidth / 2 - containerWidth) {
       container.scrollTo({ left: 0, behavior: 'auto' });
     } else {
-      container.scrollBy({ left: 3, behavior: 'auto' });
+      container.scrollBy({ left: 2, behavior: 'auto' });
     }
   };
 
   useEffect(() => {
-    const interval = setInterval(handleScroll, 15);
+    const interval = setInterval(handleScroll, 20);
     return () => clearInterval(interval);
   }, [isHovered, isTouching]);
 
-  const renderCard = (image, index) => (
-    <div
+  const renderCourseCard = (image, index) => (
+    <Card 
       key={index}
-      className="relative flex-shrink-0 w-74 h-[480px] bg-white rounded-2xl shadow-md overflow-hidden 
-                 flex flex-col border border-gray-200 transition-transform duration-300 hover:scale-105 hover:shadow-2xl mx-4 my-6"
+      className="relative flex-shrink-0 w-80 h-96 overflow-hidden group hover:shadow-2xl transition-all duration-500 mx-4 bg-gradient-to-br from-white to-gray-50"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={() => setIsTouching(true)}
       onTouchEnd={() => setIsTouching(false)}
     >
-      {/* Image */}
-      <div className="w-full h-4/5 relative overflow-hidden">
-        <img
-          src={image}
-          alt={`Course ${index + 1}`}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-        />
-      </div>
-
-      {/* Content */}
-      <div className="p-2 flex-col justify-between ">
-        <div>
-          <h3 className="text-xl font-semibold text-center  text-gray-800 mb-3">
+      <CardContent className="p-0 h-full">
+        <div className="relative h-2/3 overflow-hidden">
+          <img
+            src={image}
+            alt={`Course ${index + 1}`}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="absolute bottom-4 left-4 text-white">
+            <div className="flex items-center space-x-1 mb-2">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              ))}
+              <span className="text-sm ml-2">4.9 (1.2k)</span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="p-6 space-y-3">
+          <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
             {courseTitles[index % courseTitles.length]}
           </h3>
-          
-          <div className="flex items-center space-x-1 mb-4">
-            {[...Array(5)].map((_, i) => (
-              <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.293c.3.92-.755 1.688-1.54 1.118L10 13.348l-2.8 2.034c-.784.57-1.838-.197-1.54-1.118l1.07-3.293a1 1 0 00-.364-1.118L3.566 8.72c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z" />
-              </svg>
+          <p className="text-sm text-gray-600">
+            By {instructors[index % instructors.length]}
+          </p>
+          <div className="flex items-center justify-between">
+            <span className="text-2xl font-bold text-blue-600">₹2,999</span>
+            <span className="text-sm text-gray-500 line-through">₹9,999</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderReviewCard = (review, index) => (
+    <Card key={index} className="w-96 h-80 bg-gradient-to-br from-white to-blue-50 border-l-4 border-l-blue-500 hover:shadow-xl transition-all duration-300">
+      <CardContent className="p-6 h-full flex flex-col justify-between">
+        <div>
+          <Quote className="text-blue-500 mb-4" size={24} />
+          <p className="text-gray-700 mb-4 leading-relaxed text-sm">
+            "{review.review}"
+          </p>
+          <div className="flex items-center space-x-1 mb-3">
+            {[...Array(review.rating)].map((_, i) => (
+              <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
             ))}
           </div>
         </div>
-
         
-      </div>
-
-      {/* Ad badge */}
-        
-    </div>
+        <div className="flex items-center space-x-4">
+          <Avatar className="w-12 h-12">
+            <AvatarImage src={review.avatar} alt={review.name} />
+            <AvatarFallback>{review.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+          </Avatar>
+          <div>
+            <h4 className="font-semibold text-gray-800">{review.name}</h4>
+            <p className="text-sm text-blue-600 font-medium">{review.achievement}</p>
+            <p className="text-xs text-gray-500">{review.course}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 
   return (
     <>
-      <div className="w-full bg-gradient-to-b from-blue-200 to-white py-8">
-        <h2 className="text-5xl font-bold text-center mb-8">Featured Courses</h2>
+      {/* Featured Courses Section */}
+      <div className="w-full bg-gradient-to-b from-blue-200 to-white py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+            Featured Courses
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Discover our most popular courses taught by industry experts
+          </p>
+        </div>
 
-        <div className="relative overflow-hidden w-full">
-          <div className="flex items-center justify-center w-full py-4">
-            <div
-              ref={carouselRef}
-              className="flex items-center overflow-x-auto hide-scrollbar w-full h-[520px]"
-              style={{
-                scrollBehavior: 'smooth',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                paddingLeft: '20px',
-                paddingRight: '20px',
-                paddingTop: '10px',
-                paddingBottom: '10px'
-              }}
-            >
-              {/* Multiple copies for infinite loop */}
-              {[...Array(3)].flatMap((_, i) =>
-                images.map((img, idx) => renderCard(img, idx + i * images.length))
-              )}
+        <div className="relative overflow-hidden">
+          <div
+            ref={carouselRef}
+            className="flex items-center space-x-2 overflow-x-auto hide-scrollbar py-8 px-8"
+            style={{
+              scrollBehavior: 'smooth',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
+            {[...Array(3)].flatMap((_, i) =>
+              courseImages.map((img, idx) => renderCourseCard(img, idx + i * courseImages.length))
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Student Success Stories Section */}
+      <div className="w-full py-16 bg-gradient-to-r from-blue-900 to-purple-900">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            Student Success Stories
+          </h2>
+          <p className="text-xl text-blue-200 max-w-2xl mx-auto">
+            Real transformations from real students who achieved their dreams
+          </p>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4">
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {studentReviews.map((review, index) => (
+                <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                  {renderReviewCard(review, index)}
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="text-white border-white hover:bg-white hover:text-blue-900" />
+            <CarouselNext className="text-white border-white hover:bg-white hover:text-blue-900" />
+          </Carousel>
+        </div>
+      </div>
+
+      {/* Stats Section */}
+      <div className="w-full py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div className="space-y-2">
+              <h3 className="text-4xl font-bold text-blue-600">10,000+</h3>
+              <p className="text-gray-600">Students Enrolled</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-4xl font-bold text-blue-600">95%</h3>
+              <p className="text-gray-600">Success Rate</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-4xl font-bold text-blue-600">500+</h3>
+              <p className="text-gray-600">Expert Instructors</p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-4xl font-bold text-blue-600">50+</h3>
+              <p className="text-gray-600">Course Categories</p>
             </div>
           </div>
-
-          {/* Remove glowing side gradients as requested */}
         </div>
       </div>
 

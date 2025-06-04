@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const CourseProgress = ({ courseId }) => {
     const [progress, setProgress] = useState(null);
+    const [certificate, setCertificate] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [certificateLoading, setCertificateLoading] = useState(false);
     const [error, setError] = useState(null);
     const token = localStorage.getItem('token');
 
@@ -25,6 +29,11 @@ const CourseProgress = ({ courseId }) => {
 
                 if (response.data.success) {
                     setProgress(response.data.progress);
+                    
+                    // If course is 100% complete, check for certificate
+                    if (response.data.progress.completionPercentage === 100) {
+                        fetchCertificate();
+                    }
                 } else {
                     setError('Failed to fetch progress');
                 }
@@ -35,8 +44,54 @@ const CourseProgress = ({ courseId }) => {
             setLoading(false);
         };
 
+        const fetchCertificate = async () => {
+            try {
+                const response = await axios.get(
+                    `https://course-creation-backend.onrender.com/api/certificates/course/${courseId}`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }
+                );
+
+                if (response.data.success) {
+                    setCertificate(response.data.certificate);
+                }
+            } catch (error) {
+                // Certificate might not exist yet, which is fine
+                console.log('No certificate found for this course');
+            }
+        };
+
         fetchProgress();
     }, [courseId, token]);
+
+    const generateCertificate = async () => {
+        if (!courseId || !token) return;
+        
+        setCertificateLoading(true);
+        
+        try {
+            const response = await axios.post(
+                `https://course-creation-backend.onrender.com/api/certificates/generate/${courseId}`,
+                {},
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+
+            if (response.data.success) {
+                setCertificate(response.data.certificate);
+                toast.success('Certificate generated successfully!');
+            } else {
+                toast.error(response.data.message || 'Failed to generate certificate');
+            }
+        } catch (error) {
+            console.error('Certificate generation error:', error);
+            toast.error(error.response?.data?.message || 'Failed to generate certificate');
+        } finally {
+            setCertificateLoading(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -98,6 +153,48 @@ const CourseProgress = ({ courseId }) => {
                     </p>
                 </div>
             </div>
+
+            {/* Certificate Section */}
+            {progress.completionPercentage === 100 && (
+                <div className="mb-8 p-4 border border-green-200 rounded-lg bg-green-50">
+                    <div className="flex items-center mb-4">
+                        <div className="bg-green-100 p-2 rounded-full mr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-xl font-semibold text-green-800">Course Completed!</h3>
+                    </div>
+                    
+                    {certificate ? (
+                        <div className="mb-4">
+                            <p className="text-green-700 mb-4">Congratulations! You've earned a certificate for completing this course.</p>
+                            <Link 
+                                to={`/certificate/${certificate.certificateId}`}
+                                className="inline-block bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2 rounded-lg transition-colors"
+                            >
+                                View Certificate
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="mb-4">
+                            <p className="text-green-700 mb-4">You've completed this course! Generate your certificate of completion.</p>
+                            <button
+                                onClick={generateCertificate}
+                                disabled={certificateLoading}
+                                className="inline-block bg-green-600 hover:bg-green-700 text-white font-medium px-6 py-2 rounded-lg transition-colors"
+                            >
+                                {certificateLoading ? (
+                                    <>
+                                        <span className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></span>
+                                        Generating...
+                                    </>
+                                ) : 'Generate Certificate'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
 
             <div className="mt-8">
                 <h3 className="text-xl font-semibold mb-4 text-gray-800 flex items-center">

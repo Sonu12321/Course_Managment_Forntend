@@ -27,6 +27,11 @@ import Search from "./Components/Contianer/Search";
 // Import the new components
 import ForgotPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
+// Add these imports
+import Certificate from './Components/Certificate/Certificate';
+import VerifyCertificate from './Components/Certificate/VerifyCertificate';
+import CertificatesList from './Components/Certificate/CertificatesList';
+import Trying from "./Components/DashBoardComponents/Trying";
 
 // Then in your Routes configuration:
 
@@ -69,6 +74,7 @@ function App() {
                   {/* <Route path="/course/:courseId" element={<CourseDetails/>} /> */}
                   {/* for User */}
                   <Route path="/Register" element={<Register />} />
+                  <Route path="/trying" element={<Trying />} />
                   {/* <Route path="/Card" element={<CardForCourse />} /> */}
                   {/* Protected Route */}
                   <Route
@@ -98,6 +104,9 @@ function App() {
                     path="/course-completion/:courseId"
                     element={<CourseCompletionStats />}
                   />
+                  <Route path="/certificate/:certificateId" element={<Certificate />} />
+<Route path="/verify-certificate" element={<VerifyCertificate />} />
+<Route path="/my-certificates" element={<CertificatesList />} />
                   // Add this to your existing routes
                   <Route path="/verify-email" element={<VerifyEmail />} />
                   <Route path="/Serch" element={<Search />} />
