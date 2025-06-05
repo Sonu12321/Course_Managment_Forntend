@@ -1,8 +1,93 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, Quote } from 'lucide-react';
+
+// Custom Card component
+const Card = ({ children, className = '', ...props }) => {
+  return (
+    <div className={`bg-white rounded-lg shadow ${className}`} {...props}>
+      {children}
+    </div>
+  );
+};
+
+// Custom CardContent component
+const CardContent = ({ children, className = '' }) => {
+  return (
+    <div className={`p-4 ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+// Custom Carousel components
+const Carousel = ({ children, opts = {}, className = '' }) => {
+  return (
+    <div className={`relative ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+const CarouselContent = ({ children, className = '' }) => {
+  return (
+    <div className={`flex overflow-hidden ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+const CarouselItem = ({ children, className = '' }) => {
+  return (
+    <div className={`flex-shrink-0 ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+const CarouselPrevious = ({ className = '', ...props }) => {
+  return (
+    <button 
+      className={`absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center border ${className}`}
+      {...props}
+    >
+      ←
+    </button>
+  );
+};
+
+const CarouselNext = ({ className = '', ...props }) => {
+  return (
+    <button 
+      className={`absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center border ${className}`}
+      {...props}
+    >
+      →
+    </button>
+  );
+};
+
+// Custom Avatar components
+const Avatar = ({ children, className = '' }) => {
+  return (
+    <div className={`relative inline-block rounded-full overflow-hidden ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+const AvatarImage = ({ src, alt, className = '' }) => {
+  return (
+    <img src={src} alt={alt} className={`w-full h-full object-cover ${className}`} />
+  );
+};
+
+const AvatarFallback = ({ children, className = '' }) => {
+  return (
+    <div className={`flex items-center justify-center w-full h-full bg-gray-200 text-gray-700 font-medium ${className}`}>
+      {children}
+    </div>
+  );
+};
 
 // You can replace these with your actual images
 const courseImages = [
@@ -224,13 +309,7 @@ export default function Rotation() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4">
-          <Carousel
-            opts={{
-              align: "start",
-              loop: true,
-            }}
-            className="w-full"
-          >
+          <Carousel className="w-full">
             <CarouselContent className="-ml-2 md:-ml-4">
               {studentReviews.map((review, index) => (
                 <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">

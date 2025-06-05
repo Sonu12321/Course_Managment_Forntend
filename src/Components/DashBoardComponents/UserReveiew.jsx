@@ -1,8 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import Button from '../../Components/Contianer/Button';
 import { FaGraduationCap, FaBook, FaUsers, FaChalkboardTeacher } from 'react-icons/fa';
+
+// Simple Card component to replace shadcn UI Card
+const Card = ({ children, className = '' }) => {
+  return (
+    <div className={`bg-white rounded-lg shadow ${className}`}>
+      {children}
+    </div>
+  );
+};
+
+// Simple CardContent component to replace shadcn UI CardContent
+const CardContent = ({ children, className = '' }) => {
+  return (
+    <div className={`p-4 ${className}`}>
+      {children}
+    </div>
+  );
+};
 
 const features = [
   {
@@ -42,12 +59,12 @@ const UserReveiew = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
             <Link to="/register">
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-3 rounded-full">
+              <Button bgColor="bg-blue-600" className="text-lg px-8 py-3 rounded-full hover:bg-blue-700">
                 Get Started
               </Button>
             </Link>
             <Link to="/courses">
-              <Button variant="outline" className="text-blue-600 border-blue-600 text-lg px-8 py-3 rounded-full hover:bg-blue-100">
+              <Button bgColor="bg-transparent" textColor="text-blue-600" className="text-lg px-8 py-3 rounded-full border border-blue-600 hover:bg-blue-100">
                 Browse Courses
               </Button>
             </Link>
@@ -102,7 +119,7 @@ const UserReveiew = () => {
             className="w-full h-[300px] object-cover rounded-2xl shadow-lg mb-8"
           />
           <Link to="/demo">
-            <Button variant="outline" className="text-blue-600 border-blue-600 text-lg px-8 py-3 rounded-full hover:bg-blue-100">
+            <Button bgColor="bg-transparent" textColor="text-blue-600" className="text-lg px-8 py-3 rounded-full border border-blue-600 hover:bg-blue-100">
               View Demo
             </Button>
           </Link>
