@@ -32,6 +32,7 @@ import Certificate from './Components/Certificate/Certificate';
 import VerifyCertificate from './Components/Certificate/VerifyCertificate';
 import CertificatesList from './Components/Certificate/CertificatesList';
 import Trying from "./Components/DashBoardComponents/Trying";
+import AdminMainPage from "./Pages/AdminDashboard/adminMainPage";
 
 // Then in your Routes configuration:
 
@@ -41,6 +42,10 @@ function App() {
       <Router>
         <Routes>
           {/* Admin routes with custom layout (no navbar) */}
+          // Add this import at the top with other imports
+          import AdminMainPage from "./Pages/AdminDashboard/adminMainPage";
+          
+          // Then in your admin routes section, add this route
           <Route
             path="/admin/*"
             element={
@@ -48,8 +53,9 @@ function App() {
                 <AdminLayout>
                   <Routes>
                     <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="/users" element={<UserManagement />} />
-                    <Route path="/courses" element={<CourseManagement />} />
+                    <Route path="main" element={<AdminMainPage />} /> {/* Add this line */}
+                    <Route path="users" element={<UserManagement />} />
+                    <Route path="courses" element={<CourseManagement />} />
                     {/* Add more admin routes here as needed */}
                   </Routes>
                 </AdminLayout>

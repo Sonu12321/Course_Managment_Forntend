@@ -19,7 +19,7 @@ function CourseDetails() {
     const [completedVideos, setCompletedVideos] = useState([]);
     const { courseId } = useParams();
     const navigate = useNavigate();
-    const API_BASE_URL = 'https://course-creation-backend.onrender.com/api';
+    const API_BASE_URL = 'http://localhost:4569/api';
     const progressUpdateTimeout = useRef(null);
 
     const fetchCourseDetails = async () => {
@@ -61,7 +61,7 @@ function CourseDetails() {
             const fetchProgress = async () => {
                 try {
                     const response = await axios.get(
-                        `https://course-creation-backend.onrender.com/api/progress/course/${courseId}`,
+                        `http://localhost:4569/api/progress/course/${courseId}`,
                         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
                     );
 
@@ -88,7 +88,7 @@ function CourseDetails() {
                 if (token) {
                     try {
                         const certResponse = await axios.get(
-                            `https://course-creation-backend.onrender.com/api/certificates/course/${courseId}`,
+                            `http://localhost:4569/api/certificates/course/${courseId}`,
                             {
                                 headers: { Authorization: `Bearer ${token}` }
                             }
@@ -145,7 +145,7 @@ function CourseDetails() {
                 const videoElement = document.querySelector('video');
                 if (videoElement && (watchTime / videoElement.duration) >= 0.8) {
                     const response = await axios.post(
-                        'https://course-creation-backend.onrender.com/api/progress/mark-watched',
+                        'http://localhost:4569/api/progress/mark-watched',
                         { 
                             courseId: course._id, 
                             videoUrl: selectedVideo.url 

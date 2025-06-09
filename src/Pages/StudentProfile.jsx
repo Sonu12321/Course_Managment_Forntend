@@ -103,7 +103,7 @@ const StudentProfile = () => {
 
     const fetchProfile = async () => {
         try {
-            const response = await axios.get('https://course-creation-backend.onrender.com/api/students/profile', {
+            const response = await axios.get('http://localhost:4569/api/students/profile', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -134,7 +134,7 @@ const StudentProfile = () => {
     const fetchCourseProgress = async (courseId) => {
         try {
             const response = await axios.get(
-                `https://course-creation-backend.onrender.com/api/progress/course/${courseId}`,
+                `http://localhost:4569/api/progress/course/${courseId}`,
                 {
                     headers: { Authorization: `Bearer ${token}` }
                 }
@@ -152,7 +152,7 @@ const StudentProfile = () => {
 
     const fetchEnrolledCourses = async () => {
         try {
-            const response = await axios.get('https://course-creation-backend.onrender.com/api/students/enrolled-courses', {
+            const response = await axios.get('http://localhost:4569/api/students/enrolled-courses', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -183,7 +183,7 @@ const StudentProfile = () => {
 
     const fetchPendingInstallments = async () => {
         try {
-            const response = await axios.get('https://course-creation-backend.onrender.com/api/students/pending-installments', {
+            const response = await axios.get('http://localhost:4569/api/students/pending-installments', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -209,7 +209,7 @@ const StudentProfile = () => {
         if (profile.profileImage) formData.append('profileImage', profile.profileImage);
 
         try {
-            const response = await axios.put('https://course-creation-backend.onrender.com/api/students/Studentupdate', formData, {
+            const response = await axios.put('http://localhost:4569/api/students/Studentupdate', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${token}`

@@ -49,7 +49,7 @@ const CourseCompletionStats = () => {
 
     const fetchCourseData = async () => {
         try {
-            const response = await axios.get(`https://course-creation-backend.onrender.com/api/courses/${courseId}`, {
+            const response = await axios.get(`http://localhost:4569/api/courses/${courseId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -64,7 +64,7 @@ const CourseCompletionStats = () => {
     const fetchCompletionData = async () => {
         try {
             setLoading(true)
-            const response = await axios.get(`https://course-creation-backend.onrender.com/api/users/course-completion-stats/${courseId}`, {
+            const response = await axios.get(`http://localhost:4569/api/users/course-completion-stats/${courseId}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

@@ -21,7 +21,7 @@ const CourseProgress = ({ courseId }) => {
 
             try {
                 const response = await axios.get(
-                    `https://course-creation-backend.onrender.com/api/progress/course/${courseId}`,
+                    `http://localhost:4569/api/progress/course/${courseId}`,
                     {
                         headers: { Authorization: `Bearer ${token}` }
                     }
@@ -47,7 +47,7 @@ const CourseProgress = ({ courseId }) => {
         const fetchCertificate = async () => {
             try {
                 const response = await axios.get(
-                    `https://course-creation-backend.onrender.com/api/certificates/course/${courseId}`,
+                    `http://localhost:4569/api/certificates/course/${courseId}`,
                     {
                         headers: { Authorization: `Bearer ${token}` }
                     }
@@ -72,7 +72,7 @@ const CourseProgress = ({ courseId }) => {
         
         try {
             const response = await axios.post(
-                `https://course-creation-backend.onrender.com/api/certificates/generate/${courseId}`,
+                `http://localhost:4569/api/certificates/generate/${courseId}`,
                 {},
                 {
                     headers: { Authorization: `Bearer ${token}` }

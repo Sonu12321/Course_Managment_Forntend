@@ -20,7 +20,7 @@ const VerifyCertificate = () => {
         
         try {
             const response = await axios.get(
-                `https://course-creation-backend.onrender.com/api/certificates/verify/${certificateId.trim()}`
+                `http://localhost:4569/api/certificates/verify/${certificateId.trim()}`
             );
             
             if (response.data.success && response.data.isValid) {

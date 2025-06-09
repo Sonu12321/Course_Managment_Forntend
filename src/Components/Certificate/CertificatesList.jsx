@@ -19,7 +19,7 @@ const CertificatesList = () => {
 
             try {
                 const response = await axios.get(
-                    'https://course-creation-backend.onrender.com/api/certificates/all',
+                    'http://localhost:4569/api/certificates/all',
                     {
                         headers: { Authorization: `Bearer ${token}` }
                     }

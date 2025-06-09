@@ -38,11 +38,14 @@ const AdminLayout = ({ children }) => {
   };
 
   // Updated sidebar items with more detailed structure
+  // In the sidebarItems array, update the Main section:
+  
   const sidebarItems = [
     { 
       section: 'Main',
       items: [
-        { path: '/admin/dashboard', name: 'Dashboard', icon: <FaTachometerAlt />, tabId: 'overview' },
+        { path: '/admin/main', name: 'Admin Overview', icon: <FaTachometerAlt />, tabId: 'main' },
+        { path: '/admin/dashboard', name: 'Dashboard', icon: <FaChartBar />, tabId: 'overview' },
         { path: '/admin/users', name: 'User Management', icon: <FaUsers />, tabId: 'users' },
         { path: '/admin/courses', name: 'Course Management', icon: <FaBook />, tabId: 'courses' },
       ]

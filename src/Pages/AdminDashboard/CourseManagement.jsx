@@ -33,7 +33,7 @@ const CourseManagement = () => {
         return;
       }
 
-      const response = await axios.get('https://course-creation-backend.onrender.com/api/courses/admin/courses', {
+      const response = await axios.get('http://localhost:4569/api/courses/admin/courses', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -83,7 +83,7 @@ const CourseManagement = () => {
       }
 
       const response = await axios.put(
-        `https://course-creation-backend.onrender.com/api/courses/admin/courses/${selectedCourse._id}`,
+        `http://localhost:4569/api/courses/admin/courses/${selectedCourse._id}`,
         formData,
         {
           headers: {
@@ -118,7 +118,7 @@ const CourseManagement = () => {
       }
 
       const response = await axios.delete(
-        `https://course-creation-backend.onrender.com/api/courses/admin/courses/${courseId}`,
+        `http://localhost:4569/api/courses/admin/courses/${courseId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`

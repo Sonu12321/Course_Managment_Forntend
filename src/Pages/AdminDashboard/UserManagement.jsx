@@ -32,7 +32,7 @@ const UserManagement = () => {
         return;
       }
 
-      const response = await axios.get('https://course-creation-backend.onrender.com/api/users/all-users', {
+      const response = await axios.get('http://localhost:4569/api/users/all-users', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -66,7 +66,7 @@ const UserManagement = () => {
       }
 
       const response = await axios.put(
-        'https://course-creation-backend.onrender.com/api/users/toggle-role',
+        'http://localhost:4569/api/users/toggle-role',
         {
           userId: selectedUser,
           newRole: newRole
@@ -104,7 +104,7 @@ const UserManagement = () => {
       }
 
       const response = await axios.delete(
-        `https://course-creation-backend.onrender.com/api/users/delete-user/${userId}`,
+        `http://localhost:4569/api/users/delete-user/${userId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -132,7 +132,7 @@ const UserManagement = () => {
         return;
       }
 
-      const response = await axios.get(`https://course-creation-backend.onrender.com/api/purchases/admin/user/${userId}`, {
+      const response = await axios.get(`http://localhost:4569/api/purchases/admin/user/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

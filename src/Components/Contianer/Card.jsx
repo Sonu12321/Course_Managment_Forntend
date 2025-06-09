@@ -70,7 +70,7 @@ const CourseCard = () => {
   const fetchCourses = async (token) => {
     try {
       setLoading(true);
-      const response = await axios.get('https://course-creation-backend.onrender.com/api/courses/admin/courses', {
+      const response = await axios.get('http://localhost:4569/api/courses/admin/courses', {
         headers: {
           Authorization: `Bearer ${token}`
         }

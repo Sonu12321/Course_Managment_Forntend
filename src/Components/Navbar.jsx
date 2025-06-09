@@ -108,7 +108,7 @@ const Navbar = () => {
           {role === 'user' && (
             <button
               onClick={() => navigate('/wishlist')}
-              className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition-all relative group"
+              className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-400 transition-all relative group"
               title="Wishlist"
               aria-label="View Wishlist"
             >
@@ -173,7 +173,7 @@ const Navbar = () => {
           </span>
         </div>
         <div className="flex-grow mx-4 max-w-md hidden sm:block">
-          <Search className={`search-input ${isScrolled ? 'bg-white' : 'bg-slate-300'}`} />
+          <Search className={`search-input ${isScrolled ? 'bg-slate-400' : 'bg-slate-300'}`} />
         </div>
         <ul className="hidden lg:flex ml-10 space-x-4">
           {getNavItems().map((item, index) => (

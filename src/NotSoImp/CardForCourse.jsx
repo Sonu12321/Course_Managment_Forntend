@@ -38,7 +38,7 @@ function CardForCourse() {
 
             // Prevent any default navigation
             const response = await axios.post(
-                'https://course-creation-backend.onrender.com/api/purchases/initiate',
+                'http://localhost:4569/api/purchases/initiate',
                 {
                     courseId: course._id,
                     paymentType,
@@ -71,7 +71,7 @@ function CardForCourse() {
         try {
             // Update the purchase status in the backend
             await axios.post(
-                'https://course-creation-backend.onrender.com/api/purchases/confirm',
+                'http://localhost:4569/api/purchases/confirm',
                 {
                     paymentIntentId: paymentIntent.id
                 },
@@ -127,7 +127,7 @@ function CardForCourse() {
             if (selectedCategory) params.append('category', selectedCategory);
 
             const response = await axios.get(
-                `https://course-creation-backend.onrender.com/api/courses/courses?${params.toString()}`, 
+                `http://localhost:4569/api/courses/courses?${params.toString()}`, 
                 config
             );
             setCourses(response.data.courses);
