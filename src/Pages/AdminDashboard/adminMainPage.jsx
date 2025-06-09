@@ -46,16 +46,16 @@ const AdminMainPage = () => {
       
       // Fetch all dashboard data in parallel
       const [dashboardResponse, userResponse, courseResponse, revenueResponse] = await Promise.all([
-        axios.get('http://localhost:4569/api/admin/stats', {
+        axios.get('https://course-creation-backend.onrender.com/api/admin/stats', {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:4569/api/admin/users/stats', {
+        axios.get('https://course-creation-backend.onrender.com/api/admin/users/stats', {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:4569/api/admin/courses/stats', {
+        axios.get('https://course-creation-backend.onrender.com/api/admin/courses/stats', {
           headers: { Authorization: `Bearer ${token}` }
         }),
-        axios.get('http://localhost:4569/api/admin/revenue/stats', {
+        axios.get('https://course-creation-backend.onrender.com/api/admin/revenue/stats', {
           headers: { Authorization: `Bearer ${token}` }
         })
       ]);

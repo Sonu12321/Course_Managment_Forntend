@@ -43,7 +43,7 @@ const ProfessorProfile = () => {
 
     const fetchProfile = async () => {
         try {
-            const response = await axios.get('http://localhost:4569/api/users/professors/profile', {
+            const response = await axios.get('https://course-creation-backend.onrender.com/api/users/professors/profile', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
@@ -86,7 +86,7 @@ const ProfessorProfile = () => {
         if (profile.profileImage) formData.append('profileImage', profile.profileImage);
 
         try {
-            const response = await axios.put('http://localhost:4569/api/users/professors/update', formData, {
+            const response = await axios.put('https://course-creation-backend.onrender.com/api/users/professors/update', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${token}`

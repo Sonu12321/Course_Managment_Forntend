@@ -34,7 +34,7 @@ const CheckoutForm = ({ courseId, price, onSuccess, onError }) => {
         }
         
         const response = await axios.post(
-          'http://localhost:4569/api/purchase/initiate', // Changed from purchase/initiate to purchases/initiate
+          'https://course-creation-backend.onrender.com/api/purchase/initiate', // Changed from purchase/initiate to purchases/initiate
           {
             courseId,
             paymentType,
@@ -94,7 +94,7 @@ const CheckoutForm = ({ courseId, price, onSuccess, onError }) => {
         const token = localStorage.getItem('token');
         try {
           const confirmResponse = await axios.post(
-            'http://localhost:4569/api/purchase/confirm',
+            'https://course-creation-backend.onrender.com/api/purchase/confirm',
             {
               paymentIntentId: result.paymentIntent.id
             },

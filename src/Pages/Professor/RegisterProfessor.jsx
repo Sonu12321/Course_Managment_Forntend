@@ -48,7 +48,7 @@ function RegisterProfessor() {
       formData.append('role', 'professor'); // Default role
       formData.append('profileImage', form.profileImage);
 
-      const response = await axios.post('http://localhost:4569/api/users/register', formData, {
+      const response = await axios.post('https://course-creation-backend.onrender.com/api/users/register', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

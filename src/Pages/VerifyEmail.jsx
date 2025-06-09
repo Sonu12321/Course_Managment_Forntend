@@ -36,7 +36,7 @@ function VerifyEmail() {
 
       // Send verification request to backend
       const response = await axios.post(
-        'http://localhost:4569/api/users/verify-email',
+        'https://course-creation-backend.onrender.com/api/users/verify-email',
         { token }
       );
 

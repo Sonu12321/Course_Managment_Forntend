@@ -26,7 +26,7 @@ const CommentReviews = ({ courseId, isPurchased }) => {
         
         // Use the public endpoint if no token is available
         if (!token) {
-          const response = await axios.get(`http://localhost:4569/api/students/course/${courseId}`);
+          const response = await axios.get(`https://course-creation-backend.onrender.com/api/students/course/${courseId}`);
           
           if (response.data.success) {
             setExistingReviews(response.data.reviews || []);
@@ -37,7 +37,7 @@ const CommentReviews = ({ courseId, isPurchased }) => {
         }
 
         // If token exists, use the authenticated endpoint
-        const response = await axios.get(`http://localhost:4569/api/students/course/${courseId}`, {
+        const response = await axios.get(`https://course-creation-backend.onrender.com/api/students/course/${courseId}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -87,7 +87,7 @@ const CommentReviews = ({ courseId, isPurchased }) => {
         return;
       }
       
-      const response = await axios.post('http://localhost:4569/api/students/course-interaction', 
+      const response = await axios.post('https://course-creation-backend.onrender.com/api/students/course-interaction', 
         { 
           courseId, 
           comment,
@@ -147,7 +147,7 @@ const CommentReviews = ({ courseId, isPurchased }) => {
         return;
       }
       
-      const response = await axios.post('http://localhost:4569/api/students/review', 
+      const response = await axios.post('https://course-creation-backend.onrender.com/api/students/review', 
         { 
           courseId, 
           rating,

@@ -16,7 +16,7 @@ const ForgotPassword = () => {
     setSuccess('');
 
     try {
-      const response = await axios.post('http://localhost:4569/api/users/forgetPass', { email });
+      const response = await axios.post('https://course-creation-backend.onrender.com/api/users/forgetPass', { email });
       
       if (response.data.success) {
         setSuccess('Password reset instructions have been sent to your email. Please check your inbox.');

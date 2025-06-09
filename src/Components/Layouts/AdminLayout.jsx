@@ -45,7 +45,7 @@ const AdminLayout = ({ children }) => {
       section: 'Main',
       items: [
         { path: '/admin/main', name: 'Admin Overview', icon: <FaTachometerAlt />, tabId: 'main' },
-        { path: '/admin/dashboard', name: 'Dashboard', icon: <FaChartBar />, tabId: 'overview' },
+        // { path: '/admin/dashboard', name: 'Dashboard', icon: <FaChartBar />, tabId: 'overview' },
         { path: '/admin/users', name: 'User Management', icon: <FaUsers />, tabId: 'users' },
         { path: '/admin/courses', name: 'Course Management', icon: <FaBook />, tabId: 'courses' },
       ]

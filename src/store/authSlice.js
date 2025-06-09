@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 // Base URL for API requests
-const API_URL = 'http://localhost:4569/api'; // Adjust this to your backend URL
+const API_URL = 'https://course-creation-backend.onrender.com/api'; // Adjust this to your backend URL
 
 // Async thunks for authentication actions
 export const loginUser = createAsyncThunk(

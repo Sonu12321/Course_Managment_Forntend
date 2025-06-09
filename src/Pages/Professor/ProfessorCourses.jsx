@@ -51,7 +51,7 @@ const ProfessorCourses = () => {
     try {
       setLoading(true);
       // Fetch courses
-      const courseResponse = await axios.get('http://localhost:4569/api/courses/professor-courses', {
+      const courseResponse = await axios.get('https://course-creation-backend.onrender.com/api/courses/professor-courses', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -70,7 +70,7 @@ const ProfessorCourses = () => {
       
       // Fetch reviews
       // Fetch reviews
-      const reviewsResponse = await axios.get('http://localhost:4569/api/students/professor/reviews', {
+      const reviewsResponse = await axios.get('https://course-creation-backend.onrender.com/api/students/professor/reviews', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setReviewsData(reviewsResponse.data);

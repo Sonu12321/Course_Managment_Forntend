@@ -51,7 +51,7 @@ const ResetPassword = () => {
     setSuccess('');
 
     try {
-      const response = await axios.post('http://localhost:4569/api/users/reset-password', {
+      const response = await axios.post('https://course-creation-backend.onrender.com/api/users/reset-password', {
         token: formData.token,
         password: formData.password
       });
