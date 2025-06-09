@@ -13,7 +13,7 @@ import ProfessorCourses from "./Pages/Professor/ProfessorCourses";
 import StudentProfile from "./Pages/StudentProfile";
 import Card from "./Components/Contianer/Card";
 // import CourseDetails from "./Pages/CourseDetails"
-import AdminDashboard from "./Pages/AdminDashboard/AdminDashboard";
+// import AdminDashboard from "./Pages/AdminDashboard/AdminDashboard";
 import PrivateRoute from "./Components/ProtectedRoute/PrivateRoute";
 import ProfessorProfile from "./Pages/Professor/ProfessorProfile";
 import Rotation from "./Components/DashBoardComponents/Rotation";
@@ -52,7 +52,7 @@ function App() {
               <PrivateRoute requiredRole="admin">
                 <AdminLayout>
                   <Routes>
-                    <Route path="dashboard" element={<AdminDashboard />} />
+                    {/* <Route path="dashboard" element={<AdminDashboard />} /> */}
                     <Route path="main" element={<AdminMainPage />} /> {/* Add this line */}
                     <Route path="users" element={<UserManagement />} />
                     <Route path="courses" element={<CourseManagement />} />
