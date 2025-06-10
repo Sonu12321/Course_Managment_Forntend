@@ -1,23 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Star, Quote } from 'lucide-react';
-
-// Custom Card component
-const Card = ({ children, className = '', ...props }) => {
-  return (
-    <div className={`bg-white rounded-lg shadow ${className}`} {...props}>
-      {children}
-    </div>
-  );
-};
-
-// Custom CardContent component
-const CardContent = ({ children, className = '' }) => {
-  return (
-    <div className={`p-4 ${className}`}>
-      {children}
-    </div>
-  );
-};
+import TiltedCard from '../Style/Title';
 
 // Custom Carousel components
 const Carousel = ({ children, opts = {}, className = '' }) => {
@@ -89,7 +72,7 @@ const AvatarFallback = ({ children, className = '' }) => {
   );
 };
 
-// You can replace these with your actual images
+// Course data
 const courseImages = [
   'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop',
   'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400&h=300&fit=crop',
@@ -195,51 +178,47 @@ export default function Rotation() {
   }, [isHovered, isTouching]);
 
   const renderCourseCard = (image, index) => (
-    <Card 
+    <div
       key={index}
-      className="relative flex-shrink-0 w-80 h-96 overflow-hidden group hover:shadow-2xl transition-all duration-500 mx-4 bg-gradient-to-br from-white to-gray-50"
+      className="flex-shrink-0 w-80 mx-4"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onTouchStart={() => setIsTouching(true)}
       onTouchEnd={() => setIsTouching(false)}
     >
-      <CardContent className="p-0 h-full">
-        <div className="relative h-2/3 overflow-hidden">
-          <img
-            src={image}
-            alt={`Course ${index + 1}`}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="absolute bottom-4 left-4 text-white">
-            <div className="flex items-center space-x-1 mb-2">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              ))}
-              <span className="text-sm ml-2">4.9 (1.2k)</span>
-            </div>
-          </div>
-        </div>
+      <TiltedCard
+        imageSrc={image}
+        altText={courseTitles[index % courseTitles.length]}
+        captionText={courseTitles[index % courseTitles.length]}
+        containerHeight="240px"
+        containerWidth="100%"
+        imageHeight="240px"
+        imageWidth="100%"
+        rotateAmplitude={12}
+        scaleOnHover={1.1}
+        showMobileWarning={false}
+        showTooltip={true}
+        displayOverlayContent={true}
         
-        <div className="p-6 space-y-3">
-          <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
-            {courseTitles[index % courseTitles.length]}
-          </h3>
-          <p className="text-sm text-gray-600">
-            By {instructors[index % instructors.length]}
-          </p>
-          <div className="flex items-center justify-between">
-            <span className="text-2xl font-bold text-blue-600">₹2,999</span>
-            <span className="text-sm text-gray-500 line-through">₹9,999</span>
-          </div>
+      />
+      <div className="p-6 space-y-3 bg-white rounded-b-lg shadow-lg border-t-0">
+        <h3 className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
+          {courseTitles[index % courseTitles.length]}
+        </h3>
+        <p className="text-sm text-gray-600">
+          By {instructors[index % instructors.length]}
+        </p>
+        <div className="flex items-center justify-between">
+          <span className="text-2xl font-bold text-blue-600">₹2,999</span>
+          <span className="text-sm text-gray-500 line-through">₹9,999</span>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 
   const renderReviewCard = (review, index) => (
-    <Card key={index} className="w-96 h-80 bg-gradient-to-br from-white to-blue-50 border-l-4 border-l-blue-500 hover:shadow-xl transition-all duration-300">
-      <CardContent className="p-6 h-full flex flex-col justify-between">
+    <div className="w-96 mr-4 h-80 bg-gradient-to-br from-white to-blue-50 border-l-4 border-l-blue-500 hover:shadow-xl transition-all duration-300">
+      <div className="p-6 h-full flex flex-col justify-between">
         <div>
           <Quote className="text-blue-500 mb-4" size={24} />
           <p className="text-gray-700 mb-4 leading-relaxed text-sm">
@@ -263,8 +242,8 @@ export default function Rotation() {
             <p className="text-xs text-gray-500">{review.course}</p>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 
   return (

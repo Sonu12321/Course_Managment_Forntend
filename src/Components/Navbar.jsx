@@ -7,7 +7,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import { getUserProfile, getStudentProfile, logout } from '../store/authSlice';
 // Import the actual Search component
 import Search from './Contianer/Search';
-
+import Aurora from '../Components/Style/Nvbr';
 // Mock authSlice (replace with your actual authSlice)
 const authSlice = {
   getUserProfile: () => ({ type: 'GET_USER_PROFILE' }),
@@ -135,7 +135,7 @@ const Navbar = () => {
           <Button
             onClick={() => navigate('/login')}
             bgColor="bg-transparent hover:bg-blue-500"
-            textColor="text-gray-800 hover:text-white dark:text-gray-200"
+            textColor="text-white hover:text-white dark:text-gray-200"
             className="border border-blue-300 hover:border-blue-500 px-4 py-2"
           >
             Sign In
@@ -154,12 +154,12 @@ const Navbar = () => {
   };
 
   return (
-    <div className="sticky top-0 z-50 py-3 px-4 w-full">
+    <div className="relative top-0 z-50 py-3 px-4 w-full">
       <div
         className={`flex justify-between items-center min-h-[4.5rem] w-full px-6 rounded-xl border border-transparent ${
           isScrolled
-            ? 'bg-white dark:bg-gray-700 shadow-lg'
-            : 'bg-gray-100/40 dark:bg-gray-800/40 backdrop-blur-md'
+            ? 'bg-gray-100/40 dark:bg-gray-700 shadow-lg'
+            : 'bg-slate-600 dark:bg-gray-800/40 backdrop-blur-md'
         } transition-all duration-300`}
       >
         <div className="flex items-center flex-shrink-0">

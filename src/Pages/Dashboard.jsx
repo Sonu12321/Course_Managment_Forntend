@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { FaGraduationCap, FaBook, FaUsers, FaChalkboardTeacher } from 'react-icons/fa';
 import img from '../public/LandingPage.jpg'
 import Rotation from '../Components/DashBoardComponents/Rotation';
+import BlurText  from '../Components/Style/ShinyText';
+import FadeContent from '../Components/Style/Fade';
 const Dashboard = () => {
   const features = [
     {
@@ -27,6 +29,11 @@ const Dashboard = () => {
     }
   ];
 
+  const handleAnimationComplete = () => {
+
+  console.log('Animation completed!');
+
+};
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-300 to-white">
       {/* Hero Section */}
@@ -37,9 +44,38 @@ const Dashboard = () => {
               <main className="mt-10 mx-auto px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
                 <div className="sm:text-center lg:text-left">
                   <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                    <span className="block">Transform your future with</span>
-                    <span className="block text-blue-600">Online Learning</span>
-                  </h1>
+                    <BlurText
+
+  text="Transform your future with"
+
+  delay={150}
+
+  animateBy="words"
+
+  direction="top"
+
+  onAnimationComplete={handleAnimationComplete}
+
+  className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl"
+
+/>
+                    <BlurText
+
+  text="Online Learning"
+
+  delay={150}
+
+  animateBy="words"
+
+  direction="top"
+
+  onAnimationComplete={handleAnimationComplete}
+
+  className="text-4xl tracking-tight font-extrabold block text-blue-600 sm:text-5xl md:text-6xl"
+
+/>
+                   </h1>
+              
                   <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                     Embark on a journey of knowledge and growth. Access world-class education from anywhere, at any time.
                   </p>
@@ -69,21 +105,26 @@ const Dashboard = () => {
             </div>
 
             {/* Image Section */}
+
             <div className="hidden lg:block lg:w-1/2">
               <div className="relative h-1/2">
+            <FadeContent blur={true} duration={1000} easing="ease-out" initialOpacity={0}>
                 <img 
                   src={img} 
                   alt="Learning Platform" 
                   className="w-full h-[400px] object-cover rounded-3xl shadow-xl transform hover:scale-105 transition-transform duration-500 ease-in-out"
                 />
+                </FadeContent>
                 {/* Decorative Elements */}
                 <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-blue-100 rounded-full opacity-50"></div>
                 <div className="absolute -top-16 -right-16 w-32 h-32 bg-blue-200 rounded-full opacity-30"></div>
               </div>
-            </div>
+            </div>    
           </div>
         </div>
       </div>
+
+
   <Rotation/>
       {/* Features Section */}
       <div className="py-12 bg-white">
