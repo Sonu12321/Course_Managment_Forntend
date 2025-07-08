@@ -3,44 +3,46 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Menu, X } from 'lucide-react';
 import { FaHeart, FaUserCircle } from 'react-icons/fa';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { getUserProfile, getStudentProfile, logout } from '../store/authSlice';
-// Import the actual Search component
-import Search from './Contianer/Search';
-import Aurora from '../Components/Style/Nvbr';
-// Mock authSlice (replace with your actual authSlice)
-const authSlice = {
-  getUserProfile: () => ({ type: 'GET_USER_PROFILE' }),
-  getStudentProfile: () => ({ type: 'GET_STUDENT_PROFILE' }),
-};
 
-// Mock Button Component
-const Button = ({ children, onClick, bgColor = 'bg-blue-500 hover:bg-blue-600', textColor = 'text-white', className }) => (
+// Mock Button Component with improved accessibility
+const Button = ({ children, onClick, bgColor = 'bg-blue-500 hover:bg-blue-600', textColor = 'text-white', className, ariaLabel }) => (
   <button
     onClick={onClick}
     className={`${bgColor} ${textColor} ${className} rounded-md transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50`}
+    aria-label={ariaLabel}
   >
     {children}
   </button>
 );
 
-// Updated LogoutBtn Component to use Redux logout action
 const LogoutBtn = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   return (
     <Button
       onClick={() => {
-        // Dispatch the logout action from Redux
         dispatch(logout());
-        // Navigate to login page
         navigate('/login');
-        // Removed window.location.reload() to prevent Vercel error
       }}
-      bgColor="bg-red-500 hover:bg-red-600"
+      bgColor="group flex items-center justify-start w-11 h-11 bg-red-600 rounded-full cursor-pointer relative overflow-hidden transition-all duration-200 shadow-lg hover:w-32 hover:rounded-lg active:translate-x-1 active:translate-y-1"
+    
       className="px-4 py-2"
+      ariaLabel="Logout"
     >
-      Logout
+       <div
+        className="flex items-center justify-center w-full transition-all duration-300 group-hover:justify-start group-hover:px-3"
+      >
+        <svg className="w-4 h-4" viewBox="0 0 512 512" fill="white">
+          <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z" />
+        </svg>
+      </div>
+      <div
+        className="absolute right-5 transform translate-x-full opacity-0 text-white text-lg font-semibold transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+      >
+        Logout
+      </div>
     </Button>
   );
 };
@@ -95,6 +97,7 @@ const Navbar = () => {
       ],
       user: [
         { label: 'Courses', href: '/Cards' },
+        { label: 'About Us', href: '/AboutUs' },
         { label: 'Teach With Us', href: '/RegisterProfessor' },
       ],
     };
@@ -104,23 +107,23 @@ const Navbar = () => {
   const renderAuthButtons = () => {
     if (isAuthenticated) {
       return (
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-4" role="navigation" aria-label="User actions">
           {role === 'user' && (
             <button
               onClick={() => navigate('/wishlist')}
-              className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-400 transition-all relative group"
+              className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-all relative group"
               title="Wishlist"
               aria-label="View Wishlist"
             >
               <FaHeart size={20} className="group-hover:scale-110 transition-transform" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" aria-label="Wishlist count">
                 0
               </span>
             </button>
           )}
           <button
             onClick={navigateToProfile}
-            className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-100 transition-all group"
+            className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-all group"
             title="Profile"
             aria-label="View Profile"
           >
@@ -129,94 +132,119 @@ const Navbar = () => {
           <LogoutBtn />
         </div>
       );
-    } else {
-      return (
-        <div className="flex items-center space-x-3">
-          <Button
-            onClick={() => navigate('/login')}
-            bgColor="bg-transparent hover:bg-blue-500"
-            textColor="text-white hover:text-white dark:text-gray-200"
-            className="border border-blue-300 hover:border-blue-500 px-4 py-2"
-          >
-            Sign In
-          </Button>
-          <Button
-            onClick={() => navigate('/register')}
-            bgColor="bg-blue-500 hover:bg-blue-600"
-            textColor="text-white"
-            className="px-4 py-2"
-          >
-            Sign Up
-          </Button>
-        </div>
-      );
     }
+    return (
+      <div className="flex items-center space-x-3 " role="navigation" aria-label="Authentication">
+        <button
+        onClick={() => navigate('/login')}
+        aria-label="Sign In"
+        className="relative inline-block p-px font-semibold leading-6 text-white bg-blue-300 shadow-2xl cursor-pointer rounded-xl shadow-blue-200 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95"
+      >
+        <span
+          className="absolute inset-0 rounded-xl bg-gradient-to-r from-teal-400 via-blue-500 to-purple-500 p-[2px] opacity-0 transition-opacity duration-500 hover:opacity-100"
+        ></span>
+
+        <span className="relative z-10 block px-6 py-3 rounded-xl bg-blue-500">
+          Sign In
+        </span>
+      </button>
+
+      {/* Sign Up button */}
+      <button
+        onClick={() => navigate('/register')}
+        aria-label="Sign Up"
+        className="relative inline-block p-px font-semibold leading-6 text-white bg-blue-300 shadow-2xl cursor-pointer rounded-xl shadow-blue-200 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95"
+      >
+        <span
+          className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-[2px] opacity-0 transition-opacity duration-500 hover:opacity-100"
+        ></span>
+
+        <span className="relative z-10 block px-6 py-3 rounded-xl bg-blue-500">
+          Sign Up
+        </span>
+      </button>
+      </div>
+    );
   };
 
   return (
-    <div className="relative top-0 z-50 py-3 px-4 w-full">
-      <div
-        className={`flex justify-between items-center min-h-[4.5rem] w-full px-6 rounded-xl border border-transparent ${
+    <header className="  bg-slate-400 w-full border-black" role="banner">
+      <nav
+        className={`flex justify-between items-center min-h-[4.5rem] w-full px-6 my-1  ${
           isScrolled
-            ? 'bg-gray-100/40 dark:bg-gray-700 shadow-lg'
-            : 'bg-slate-600 dark:bg-gray-800/40 backdrop-blur-md'
+            ? 'bg-white shadow-lg'
+            : 'bg-white'
         } transition-all duration-300`}
+        role="navigation"
+        aria-label="Main navigation"
       >
         <div className="flex items-center flex-shrink-0">
-          <span
-            className="text-2xl font-bold tracking-tight text-blue-600 hover:text-blue-700 cursor-pointer transition-all duration-200"
-            onClick={() => navigate('/')}
-            role="button"
-            aria-label="Go to Homepage"
+          <a
+            href="/"
+            className="text-2xl font-bold tracking-tight text-blue-600 hover:text-blue-700 transition-all duration-200"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/');
+            }}
+            aria-label="HoopGear - Go to Homepage"
           >
-            HoopGear
-          </span>
+
+            HopeGear
+          </a>
         </div>
-        <div className="flex-grow mx-4 max-w-md hidden sm:block">
-          <Search className={`search-input ${isScrolled ? 'bg-slate-400' : 'bg-slate-300'}`} />
-        </div>
-        <ul className="hidden lg:flex ml-10 space-x-4">
+
+        <ul className="hidden lg:flex 10 space-x-4" role="menubar">
           {getNavItems().map((item, index) => (
-            <li key={index}>
+            <li key={index} role="none">
               <Button
                 onClick={() => navigate(item.href)}
-                bgColor="bg-blue-500 hover:bg-blue-600"
-                textColor="text-white"
+                bgColor="text-gray-700 hover:text-blue-600 hover:bg-blue-200 block px-4 py-3 text-base font-medium transition-all duration-200 rounded-lg font-semibold"
+                textColor="text-black hover:text-blue-600 text-xl "
                 className="px-4 py-2"
+                ariaLabel={item.label}
+                role="menuitem"
               >
                 {item.label}
               </Button>
             </li>
           ))}
         </ul>
+
         <div className="hidden lg:flex items-center ml-6">{renderAuthButtons()}</div>
+
         <Button
           onClick={toggleNavbar}
-          className="lg:hidden p-2 hover:bg-blue-100 rounded-full transition-all"
+          className="lg:hidden p-2 hover:bg-blue-50 rounded-full transition-all"
           bgColor="bg-transparent"
-          aria-label={mobileDrawerOpen ? 'Close Menu' : 'Open Menu'}
+          ariaLabel={mobileDrawerOpen ? 'Close Menu' : 'Open Menu'}
         >
           {mobileDrawerOpen ? <X size={24} /> : <Menu size={24} />}
         </Button>
-      </div>
+      </nav>
+
       {mobileDrawerOpen && (
-        <div className="fixed inset-0 z-20 bg-black bg-opacity-50 backdrop-blur-sm lg:hidden">
-          <div className="fixed right-0 top-0 h-full z-30 bg-white dark:bg-gray-900 w-4/5 max-w-sm p-6 shadow-2xl flex flex-col overflow-y-auto">
+        <div 
+          className="fixed inset-0 z-20 bg-black bg-opacity-50 backdrop-blur-sm lg:hidden"
+          aria-modal="true"
+          role="dialog"
+        >
+          <div 
+            className="fixed right-0 top-0 h-full z-30 bg-white w-4/5 max-w-sm p-6 shadow-2xl flex flex-col overflow-y-auto"
+            role="menu"
+          >
             <div className="flex justify-end mb-6">
               <button
                 onClick={toggleNavbar}
-                className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-all"
+                className="p-2 rounded-full hover:bg-gray-100 transition-all"
                 aria-label="Close Menu"
               >
                 <X size={24} />
               </button>
             </div>
-            <div className="w-full mb-8">
-              <Search />
-            </div>
-            <ul className="space-y-4">
+
+            <ul className="space-y-4" role="menu">
               {getNavItems().map((item, index) => (
-                <li key={index} className="py-2">
+                <li key={index} role="none" className="py-2">
                   <Button
                     onClick={() => {
                       navigate(item.href);
@@ -225,20 +253,23 @@ const Navbar = () => {
                     bgColor="bg-blue-500 hover:bg-blue-600"
                     textColor="text-white"
                     className="w-full px-4 py-3 text-center"
+                    ariaLabel={item.label}
+                    role="menuitem"
                   >
                     {item.label}
                   </Button>
                 </li>
               ))}
             </ul>
-            <div className="mt-auto pt-8 border-t border-gray-200 dark:border-gray-700">
+
+            <div className="mt-auto pt-8 border-t border-gray-200">
               <div className="flex flex-col space-y-4 w-full items-center">{renderAuthButtons()}</div>
             </div>
           </div>
         </div>
       )}
       <ToastContainer />
-    </div>
+    </header>
   );
 };
 
