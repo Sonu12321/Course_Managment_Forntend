@@ -57,9 +57,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 via-blue-300 to-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full mx-auto space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-blue-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-300 to-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      <div className="max-w-md w-full mx-auto space-y-8  p-10 rounded-2xl shadow-xl border border-blue-100 overflow-hidden">
         <div className="text-center">
+
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl mb-4 shadow-lg text-center">
+                                  <FaLock className="h-8 w-8 text-white" />
+                                </div>
+        <div className="text-center">
+        </div>
           <h1 className="text-4xl text-gray-800 font-bold font-serif tracking-tight">Welcome Back</h1>
           <p className="mt-3 text-gray-600 font-medium">Please sign in to your account</p>
         </div>
@@ -82,7 +88,7 @@ const Login = () => {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full pl-10 px-4 py-3.5 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
+                className="w-full pl-12 pr-4 py-4 bg-white/5  border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-lg text-black placeholder-gray-400 hover:bg-white/10"
                 required
               />
             </div>
@@ -97,7 +103,7 @@ const Login = () => {
                 name="password"
                 value={form.password}
                 onChange={handleChange}
-                className="w-full pl-10 px-4 py-3.5 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 shadow-sm"
+                className="w-full pl-12 pr-4 py-4 bg-white/5  border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-lg text-black placeholder-gray-400 hover:bg-white/10"
                 required
               />
               <button 

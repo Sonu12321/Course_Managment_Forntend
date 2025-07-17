@@ -104,173 +104,338 @@ const Navbar = () => {
     return routes[role] || routes.user;
   };
 
-  const renderAuthButtons = () => {
-    if (isAuthenticated) {
-      return (
-        <div className="flex items-center space-x-4" role="navigation" aria-label="User actions">
-          {role === 'user' && (
-            <button
-              onClick={() => navigate('/wishlist')}
-              className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-all relative group"
-              title="Wishlist"
-              aria-label="View Wishlist"
-            >
-              <FaHeart size={20} className="group-hover:scale-110 transition-transform" />
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" aria-label="Wishlist count">
-                0
-              </span>
-            </button>
-          )}
+const renderAuthButtons = () => {
+  if (isAuthenticated) {
+    return (
+      <div className="flex items-center space-x-3" role="navigation" aria-label="User actions">
+        {role === 'user' && (
           <button
-            onClick={navigateToProfile}
-            className="text-blue-500 hover:text-blue-700 p-2 rounded-full hover:bg-blue-50 transition-all group"
-            title="Profile"
-            aria-label="View Profile"
+            onClick={() => navigate('/wishlist')}
+            className={`relative p-3 rounded-xl transition-all duration-300 group transform hover:scale-110 active:scale-95 ${
+              isScrolled
+                ? 'text-slate-700 hover:text-red-600 hover:bg-red-50 hover:shadow-lg hover:shadow-red-100/50'
+                : 'text-gray-100 hover:text-red-300 hover:bg-white/10 hover:shadow-lg hover:shadow-white/10'
+            }`}
+            title="Wishlist"
+            aria-label="View Wishlist"
           >
-            <FaUserCircle size={22} className="group-hover:scale-110 transition-transform" />
+            <FaHeart size={20} className="group-hover:scale-110 transition-transform duration-300 relative z-10" />
+            
+            {/* Wishlist count badge */}
+            <span 
+              className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-lg animate-pulse" 
+              aria-label="Wishlist count"
+            >
+              0
+            </span>
+            
+            {/* Hover effect background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 opacity-0 group-hover:opacity-10 rounded-xl transition-all duration-300"></div>
+            
+            {/* Border animation */}
+            <div className={`absolute inset-0 border-2 border-transparent group-hover:border-red-200/30 rounded-xl transition-all duration-300 ${
+              !isScrolled && 'group-hover:border-white/20'
+            }`}></div>
           </button>
+        )}
+        
+        <button
+          onClick={navigateToProfile}
+          className={`relative p-3 rounded-xl transition-all duration-300 group transform hover:scale-110 active:scale-95 ${
+            isScrolled
+              ? 'text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 hover:shadow-lg hover:shadow-emerald-100/50'
+              : 'text-gray-100 hover:text-emerald-300 hover:bg-white/10 hover:shadow-lg hover:shadow-white/10'
+          }`}
+          title="Profile"
+          aria-label="View Profile"
+        >
+          <FaUserCircle size={22} className="group-hover:scale-110 transition-transform duration-300 relative z-10" />
+          
+          {/* Hover effect background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 to-teal-600 opacity-0 group-hover:opacity-10 rounded-xl transition-all duration-300"></div>
+          
+          {/* Border animation */}
+          <div className={`absolute inset-0 border-2 border-transparent group-hover:border-emerald-200/30 rounded-xl transition-all duration-300 ${
+            !isScrolled && 'group-hover:border-white/20'
+          }`}></div>
+        </button>
+        
+        <div className="ml-2">
           <LogoutBtn />
         </div>
-      );
-    }
-    return (
-      <div className="flex items-center space-x-3 " role="navigation" aria-label="Authentication">
-        <button
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center space-x-3" role="navigation" aria-label="Authentication">
+      {/* Sign In Button */}
+      <button
         onClick={() => navigate('/login')}
         aria-label="Sign In"
-        className="relative inline-block p-px font-semibold leading-6 text-white bg-blue-300 shadow-2xl cursor-pointer rounded-xl shadow-blue-200 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95"
+        className={`relative group px-6 py-3 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 overflow-hidden ${
+          isScrolled
+            ? 'text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-200/50 hover:shadow-xl hover:shadow-indigo-300/60'
+            : 'text-white bg-gradient-to-r from-indigo-500/80 to-purple-500/80 hover:from-indigo-600 hover:to-purple-600 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-400/40'
+        }`}
       >
-        <span
-          className="absolute inset-0 rounded-xl bg-gradient-to-r from-teal-400 via-blue-500 to-purple-500 p-[2px] opacity-0 transition-opacity duration-500 hover:opacity-100"
-        ></span>
-
-        <span className="relative z-10 block px-6 py-3 rounded-xl bg-blue-500">
-          Sign In
+        <span className="relative z-10 flex items-center space-x-2">
+          <span>Sign In</span>
         </span>
+        
+        {/* Animated gradient border */}
+        <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 p-[2px]">
+            <div className={`w-full h-full rounded-xl ${
+              isScrolled ? 'bg-white' : 'bg-slate-800'
+            }`}></div>
+          </div>
+        </div>
+        
+        {/* Shimmer effect */}
+        <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-shimmer transition-all duration-700"></div>
       </button>
 
-      {/* Sign Up button */}
+      {/* Sign Up Button */}
       <button
         onClick={() => navigate('/register')}
         aria-label="Sign Up"
-        className="relative inline-block p-px font-semibold leading-6 text-white bg-blue-300 shadow-2xl cursor-pointer rounded-xl shadow-blue-200 transition-transform duration-300 ease-in-out hover:scale-105 active:scale-95"
-      >
-        <span
-          className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 p-[2px] opacity-0 transition-opacity duration-500 hover:opacity-100"
-        ></span>
-
-        <span className="relative z-10 block px-6 py-3 rounded-xl bg-blue-500">
-          Sign Up
-        </span>
-      </button>
-      </div>
-    );
-  };
-
-  return (
-    <header className="  bg-slate-400 w-full border-black" role="banner">
-      <nav
-        className={`flex justify-between items-center min-h-[4.5rem] w-full px-6 my-1  ${
+        className={`relative group px-6 py-3 font-semibold rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 overflow-hidden ${
           isScrolled
-            ? 'bg-white shadow-lg'
-            : 'bg-white'
-        } transition-all duration-300`}
-        role="navigation"
-        aria-label="Main navigation"
+            ? 'text-white bg-gradient-to-r from-rose-600 to-orange-600 hover:from-rose-700 hover:to-orange-700 shadow-lg shadow-rose-200/50 hover:shadow-xl hover:shadow-rose-300/60'
+            : 'text-white bg-gradient-to-r from-rose-500/80 to-orange-500/80 hover:from-rose-600 hover:to-orange-600 shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-400/40'
+        }`}
       >
-        <div className="flex items-center flex-shrink-0">
-          <a
-            href="/"
-            className="text-2xl font-bold tracking-tight text-blue-600 hover:text-blue-700 transition-all duration-200"
-            onClick={(e) => {
-              e.preventDefault();
-              navigate('/');
-            }}
-            aria-label="HoopGear - Go to Homepage"
-          >
-
-            HopeGear
-          </a>
+        <span className="relative z-10 flex items-center space-x-2">
+          <span>Sign Up</span>
+        </span>
+        
+        {/* Animated gradient border */}
+        <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-pink-400 via-rose-500 to-orange-500 p-[2px]">
+            <div className={`w-full h-full rounded-xl ${
+              isScrolled ? 'bg-white' : 'bg-slate-800'
+            }`}></div>
+          </div>
         </div>
+        
+        {/* Shimmer effect */}
+        <div className="absolute inset-0 -skew-x-12 bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 group-hover:animate-shimmer transition-all duration-700"></div>
+      </button>
+    </div>
+  );
+};
 
-        <ul className="hidden lg:flex 10 space-x-4" role="menubar">
-          {getNavItems().map((item, index) => (
-            <li key={index} role="none">
-              <Button
-                onClick={() => navigate(item.href)}
-                bgColor="text-gray-700 hover:text-blue-600 hover:bg-blue-200 block px-4 py-3 text-base font-medium transition-all duration-200 rounded-lg font-semibold"
-                textColor="text-black hover:text-blue-600 text-xl "
-                className="px-4 py-2"
-                ariaLabel={item.label}
-                role="menuitem"
-              >
-                {item.label}
-              </Button>
-            </li>
-          ))}
-        </ul>
-
-        <div className="hidden lg:flex items-center ml-6">{renderAuthButtons()}</div>
-
-        <Button
-          onClick={toggleNavbar}
-          className="lg:hidden p-2 hover:bg-blue-50 rounded-full transition-all"
-          bgColor="bg-transparent"
-          ariaLabel={mobileDrawerOpen ? 'Close Menu' : 'Open Menu'}
+return (
+  <>
+    <nav
+      className={`flex justify-between items-center min-h-[5rem] w-full px-8 backdrop-blur-md border-b border-white/10 ${
+        isScrolled
+          ? 'bg-white/95 shadow-xl shadow-black/5'
+          : 'bg-gradient-to-r from-slate-900/95 to-slate-800/95'
+      } transition-all duration-500 ease-in-out relative z-50`}
+      role="navigation"
+      aria-label="Main navigation"
+    >
+      {/* Logo Section */}
+      <div className="flex items-center flex-shrink-0">
+        <a
+          href="/"
+          className={`text-2xl font-bold tracking-tight relative group ${
+            isScrolled 
+              ? 'text-slate-800 hover:text-indigo-600' 
+              : 'text-white hover:text-indigo-300'
+          } transition-all duration-300`}
+          onClick={(e) => {
+            e.preventDefault();
+            navigate('/');
+          }}
+          aria-label="HoopGear - Go to Homepage"
         >
-          {mobileDrawerOpen ? <X size={24} /> : <Menu size={24} />}
-        </Button>
-      </nav>
+          <span className="relative z-10">HoopGear</span>
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-10 rounded-lg transform scale-110 transition-all duration-300"></div>
+          <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-indigo-600 to-purple-600 group-hover:w-full transition-all duration-300"></div>
+        </a>
+      </div>
 
-      {mobileDrawerOpen && (
+      {/* Desktop Navigation */}
+      <ul className="hidden lg:flex items-center space-x-4" role="menubar">
+        {getNavItems().map((item, index) => (
+          <li key={index} role="none">
+            <Button
+              onClick={() => navigate(item.href)}
+              className={`relative px-6 py-3 text-base font-medium rounded-xl transition-all duration-300 group overflow-hidden ${
+                isScrolled
+                  ? 'text-slate-700 hover:text-indigo-600 hover:bg-indigo-50 hover:shadow-lg hover:shadow-indigo-100/50'
+                  : 'text-gray-100 hover:text-white hover:bg-white/10 hover:shadow-lg hover:shadow-white/10'
+              } transform hover:scale-105 active:scale-95`}
+              ariaLabel={item.label}
+              role="menuitem"
+            >
+              <span className="relative z-10">{item.label}</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-10 transition-all duration-300"></div>
+              <div className={`absolute inset-0 border-2 border-transparent group-hover:border-indigo-200/30 rounded-xl transition-all duration-300 ${
+                !isScrolled && 'group-hover:border-white/20'
+              }`}></div>
+            </Button>
+          </li>
+        ))}
+      </ul>
+
+      {/* Auth Buttons Section */}
+      <div className="hidden lg:flex items-center space-x-4">
+        <div className={`flex items-center space-x-3 ${
+          isScrolled ? 'text-slate-600' : 'text-gray-200'
+        }`}>
+          {renderAuthButtons()}
+        </div>
+      </div>
+
+      {/* Mobile Menu Button */}
+      <Button
+        onClick={toggleNavbar}
+        className={`lg:hidden p-3 rounded-xl transition-all duration-300 transform hover:scale-110 active:scale-95 ${
+          isScrolled
+            ? 'text-slate-700 hover:bg-indigo-50 hover:text-indigo-600 hover:shadow-lg hover:shadow-indigo-100/50'
+            : 'text-gray-100 hover:bg-white/10 hover:text-white hover:shadow-lg hover:shadow-white/10'
+        }`}
+        bgColor="bg-transparent"
+        ariaLabel={mobileDrawerOpen ? 'Close Menu' : 'Open Menu'}
+      >
+        <div className="relative">
+          {mobileDrawerOpen ? (
+            <X size={24} className="transform transition-transform duration-300 rotate-180" />
+          ) : (
+            <Menu size={24} className="transform transition-transform duration-300" />
+          )}
+        </div>
+      </Button>
+
+      {/* Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-indigo-600 via-purple-600 to-rose-600 opacity-50 ${
+          isScrolled ? 'opacity-30' : 'opacity-70'
+        } transition-opacity duration-500`}></div>
+      </div>
+    </nav>
+
+    {/* Enhanced Mobile Menu */}
+    {mobileDrawerOpen && (
+      <div 
+        className="fixed inset-0 z-40 lg:hidden"
+        aria-modal="true"
+        role="dialog"
+      >
+        {/* Backdrop */}
         <div 
-          className="fixed inset-0 z-20 bg-black bg-opacity-50 backdrop-blur-sm lg:hidden"
-          aria-modal="true"
-          role="dialog"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
+          onClick={toggleNavbar}
+        />
+        
+        {/* Mobile Menu Panel */}
+        <div 
+          className="fixed right-0 top-0 h-full z-50 bg-white/95 backdrop-blur-md w-4/5 max-w-sm shadow-2xl flex flex-col overflow-y-auto transform transition-transform duration-300 ease-in-out"
+          role="menu"
         >
-          <div 
-            className="fixed right-0 top-0 h-full z-30 bg-white w-4/5 max-w-sm p-6 shadow-2xl flex flex-col overflow-y-auto"
-            role="menu"
-          >
-            <div className="flex justify-end mb-6">
-              <button
-                onClick={toggleNavbar}
-                className="p-2 rounded-full hover:bg-gray-100 transition-all"
-                aria-label="Close Menu"
-              >
-                <X size={24} />
-              </button>
-            </div>
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200/50">
+            <div className="text-xl font-bold text-slate-800">Menu</div>
+            <button
+              onClick={toggleNavbar}
+              className="p-2 rounded-xl hover:bg-gray-100 transition-all duration-200 text-slate-600 hover:text-slate-800"
+              aria-label="Close Menu"
+            >
+              <X size={24} />
+            </button>
+          </div>
 
-            <ul className="space-y-4" role="menu">
+          {/* Navigation Links */}
+          <div className="flex-1 px-6 py-4">
+            <ul className="space-y-2" role="menu">
               {getNavItems().map((item, index) => (
-                <li key={index} role="none" className="py-2">
+                <li key={index} role="none">
                   <Button
                     onClick={() => {
                       navigate(item.href);
                       setMobileDrawerOpen(false);
                     }}
-                    bgColor="bg-blue-500 hover:bg-blue-600"
-                    textColor="text-white"
-                    className="w-full px-4 py-3 text-center"
+                    className="w-full px-4 py-3 text-left rounded-xl transition-all duration-200 text-slate-700 hover:text-indigo-600 hover:bg-indigo-50 group"
                     ariaLabel={item.label}
                     role="menuitem"
                   >
-                    {item.label}
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{item.label}</span>
+                      <div className="w-1 h-1 bg-indigo-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    </div>
                   </Button>
                 </li>
               ))}
             </ul>
+          </div>
 
-            <div className="mt-auto pt-8 border-t border-gray-200">
-              <div className="flex flex-col space-y-4 w-full items-center">{renderAuthButtons()}</div>
+          {/* Mobile Auth Buttons */}
+          <div className="px-6 py-6 border-t border-gray-200/50 bg-gray-50/50">
+            <div className="space-y-3">
+              {isAuthenticated ? (
+                <div className="flex flex-col space-y-3">
+                  {role === 'user' && (
+                    <button
+                      onClick={() => {
+                        navigate('/wishlist');
+                        setMobileDrawerOpen(false);
+                      }}
+                      className="flex items-center space-x-3 p-3 rounded-xl text-slate-700 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
+                    >
+                      <FaHeart size={18} />
+                      <span className="font-medium">Wishlist</span>
+                      <span className="ml-auto bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      navigateToProfile();
+                      setMobileDrawerOpen(false);
+                    }}
+                    className="flex items-center space-x-3 p-3 rounded-xl text-slate-700 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200"
+                  >
+                    <FaUserCircle size={18} />
+                    <span className="font-medium">Profile</span>
+                  </button>
+                  <div className="pt-2">
+                    <LogoutBtn />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => {
+                      navigate('/login');
+                      setMobileDrawerOpen(false);
+                    }}
+                    className="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-lg"
+                  >
+                    Sign In
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate('/register');
+                      setMobileDrawerOpen(false);
+                    }}
+                    className="w-full px-4 py-3 bg-gradient-to-r from-rose-600 to-orange-600 text-white font-semibold rounded-xl hover:from-rose-700 hover:to-orange-700 transition-all duration-200 shadow-lg"
+                  >
+                    Sign Up
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      )}
-      <ToastContainer />
-    </header>
-  );
-};
+      </div>
+    )}
+    
+    <ToastContainer />
+  </>
+);
+}
 
 export default Navbar;
