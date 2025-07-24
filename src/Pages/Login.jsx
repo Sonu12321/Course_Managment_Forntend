@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../store/authSlice';
-import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { Zap, Sparkles, Shield, ArrowRight } from 'lucide-react';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -14,6 +15,21 @@ const Login = () => {
     password: ''
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [particles, setParticles] = useState([]);
+
+  // Generate floating particles
+  React.useEffect(() => {
+    const newParticles = Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      size: Math.random() * 4 + 2,
+      opacity: Math.random() * 0.6 + 0.2,
+      speed: Math.random() * 2 + 1,
+    }));
+    setParticles(newParticles);
+  }, []);
 
   const handleChange = (e) => {
     setForm({
@@ -29,24 +45,19 @@ const Login = () => {
     setError("");
     
     try {
-      // Using the loginUser thunk from our authSlice
       const resultAction = await dispatch(loginUser(form));
       
       if (loginUser.fulfilled.match(resultAction)) {
-        // Check user role from the response
         const userRole = resultAction.payload.user.role;
         
-        // Navigate based on user role
         if (userRole === 'admin') {
           navigate('/admin/dashboard');
         } else if (userRole === 'professor') {
           navigate('/ProfessorDashboard');
         } else {
-          // Default navigation for regular users
           navigate('/');
         }
       } else if (loginUser.rejected.match(resultAction)) {
-        // If login failed, set the error message
         setError(resultAction.payload?.message || "Login failed. Please try again.");
       }
     } catch (error) {
@@ -57,119 +68,292 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-300 to-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="max-w-md w-full mx-auto space-y-8  p-10 rounded-2xl shadow-xl border border-blue-100 overflow-hidden">
-        <div className="text-center">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center py-4 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Floating background particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {particles.map((particle) => (
+          <div
+            key={particle.id}
+            className="absolute rounded-full bg-sky-400/20 animate-float"
+            style={{
+              left: `${particle.x}%`,
+              top: `${particle.y}%`,
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+              opacity: particle.opacity,
+              animationDelay: `${particle.id * 0.2}s`,
+              animationDuration: `${particle.speed + 4}s`,
+            }}
+          />
+        ))}
+      </div>
 
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl mb-4 shadow-lg text-center">
-                                  <FaLock className="h-8 w-8 text-white" />
-                                </div>
-        <div className="text-center">
-        </div>
-          <h1 className="text-4xl text-gray-800 font-bold font-serif tracking-tight">Welcome Back</h1>
-          <p className="mt-3 text-gray-600 font-medium">Please sign in to your account</p>
-        </div>
+      {/* Background grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(56,189,248,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.03)_1px,transparent_1px)] bg-[size:50px_50px] pointer-events-none"></div>
+
+      {/* COMPACT: Main login container - Increased width for better proportions */}
+      <div className="relative z-10 w-full max-w-lg">
+        {/* Glow effect container */}
+        <div className="absolute inset-0 bg-gradient-to-r from-sky-400/20 via-indigo-400/20 to-purple-400/20 rounded-3xl blur-xl opacity-60 animate-pulse pointer-events-none"></div>
         
-        {error && (
-          <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center font-medium border-l-4 border-red-500">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-          <div className="space-y-5">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaEnvelope className="h-5 w-5 text-blue-500" />
+        <div className="
+          relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 
+          backdrop-blur-xl border border-sky-400/20 
+          rounded-3xl shadow-2xl shadow-sky-500/20 
+          p-6 sm:p-8 space-y-6 overflow-hidden
+          hover:shadow-[0_0_60px_rgba(56,189,248,0.3)]
+          transition-all duration-700
+        ">
+          {/* Background shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-1000 pointer-events-none"></div>
+          
+          {/* COMPACT: Header Section */}
+          <div className="relative z-10 text-center space-y-4">
+            {/* Logo/Icon - Reduced size */}
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-500 shadow-lg shadow-sky-500/30 mb-2 group hover:scale-110 transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-br from-sky-400/20 to-purple-400/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+              <Shield className="h-8 w-8 text-white relative z-10 group-hover:scale-110 transition-transform duration-300" />
+            </div>
+
+            {/* Welcome Text - Reduced spacing */}
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-sky-500/20 to-indigo-500/20 border border-sky-400/30 backdrop-blur-sm">
+                <Sparkles className="w-4 h-4 text-sky-400 animate-pulse" />
+                <span className="text-sky-200 font-bold text-sm uppercase tracking-wider">Secure Access</span>
               </div>
-              <input
-                type="email"
-                placeholder="Email Address"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                className="w-full pl-12 pr-4 py-4 bg-white/5  border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-lg text-black placeholder-gray-400 hover:bg-white/10"
-                required
-              />
+
+              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+                Welcome{' '}
+                <span className="bg-gradient-to-r from-sky-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                  Back
+                </span>
+              </h1>
+              
+              <p className="text-base text-slate-300 font-medium">
+                Access your quantum learning portal
+              </p>
+            </div>
+          </div>
+          
+          {/* COMPACT: Error Message */}
+          {error && (
+            <div className="
+              relative p-4 rounded-2xl overflow-hidden
+              bg-gradient-to-r from-red-500/10 to-pink-500/10 
+              border border-red-400/20 backdrop-blur-sm
+              animate-slideInUp
+            ">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-400/5 to-pink-400/5 pointer-events-none"></div>
+              <div className="relative z-10 flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-red-500/20 to-pink-500/20 border border-red-400/30">
+                  <Zap className="h-4 w-4 text-red-400" />
+                </div>
+                <span className="text-red-200 font-medium">{error}</span>
+              </div>
+            </div>
+          )}
+          
+          {/* COMPACT: Login Form */}
+          <form onSubmit={handleSubmit} className="relative z-10 space-y-4">
+            {/* Email Field - Reduced spacing */}
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-sky-200">
+                Email Address
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                  <FaEnvelope className="h-5 w-5 text-sky-400 group-focus-within:text-sky-300 transition-colors duration-300" />
+                </div>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  className="
+                    relative z-20 w-full pl-12 pr-4 py-3
+                    bg-gradient-to-r from-slate-700/50 to-slate-600/50 
+                    backdrop-blur-sm border border-sky-400/20 
+                    rounded-xl text-white placeholder-slate-400
+                    focus:ring-2 focus:ring-sky-400/50 focus:border-sky-300/50 
+                    hover:border-sky-300/40
+                    transition-all duration-300 
+                    shadow-lg hover:shadow-[0_0_20px_rgba(56,189,248,0.2)]
+                  "
+                  required
+                />
+              </div>
             </div>
             
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <FaLock className="h-5 w-5 text-blue-500" />
+            {/* Password Field - Reduced spacing */}
+            <div className="space-y-2">
+              <label className="block text-sm font-bold text-sky-200">
+                Password
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                  <FaLock className="h-5 w-5 text-sky-400 group-focus-within:text-sky-300 transition-colors duration-300" />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  className="
+                    relative z-20 w-full pl-12 pr-12 py-3
+                    bg-gradient-to-r from-slate-700/50 to-slate-600/50 
+                    backdrop-blur-sm border border-sky-400/20 
+                    rounded-xl text-white placeholder-slate-400
+                    focus:ring-2 focus:ring-sky-400/50 focus:border-sky-300/50 
+                    hover:border-sky-300/40
+                    transition-all duration-300 
+                    shadow-lg hover:shadow-[0_0_20px_rgba(56,189,248,0.2)]
+                  "
+                  required
+                />
+                <button 
+                  type="button"
+                  className="
+                    absolute inset-y-0 right-0 pr-4 flex items-center z-30
+                    text-slate-400 hover:text-sky-300 
+                    transition-colors duration-300
+                  "
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <FaEyeSlash className="h-5 w-5" />
+                  ) : (
+                    <FaEye className="h-5 w-5" />
+                  )}
+                </button>
               </div>
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                className="w-full pl-12 pr-4 py-4 bg-white/5  border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all duration-300 shadow-lg text-black placeholder-gray-400 hover:bg-white/10"
-                required
-              />
-              <button 
+            </div>
+            
+            {/* COMPACT: Remember Me & Forgot Password */}
+            <div className="flex items-center justify-between pt-2">
+              <label className="flex items-center group cursor-pointer">
+                <div className="relative">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="sr-only"
+                  />
+                  <div className={`
+                    w-4 h-4 rounded border-2 transition-all duration-300
+                    ${rememberMe 
+                      ? 'bg-gradient-to-r from-sky-500 to-indigo-500 border-sky-400/50' 
+                      : 'border-sky-400/40 bg-slate-700/50'
+                    }
+                    group-hover:border-sky-300/60
+                  `}>
+                    {rememberMe && (
+                      <svg className="w-2.5 h-2.5 text-white absolute top-0.5 left-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                <span className="ml-2 text-sky-200 font-medium group-hover:text-sky-100 transition-colors duration-300 text-sm">
+                  Remember me
+                </span>
+              </label>
+              
+              <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => navigate('/forgot-password')}
+                className="text-sky-300 hover:text-sky-200 font-medium transition-colors duration-300 hover:underline text-sm"
               >
-                {showPassword ? (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                )}
+                Forgot password?
               </button>
             </div>
-          </div>
-          
-          <div className="flex items-center justify-between text-sm">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-gray-600 font-medium">
-                Remember me
-              </label>
+            
+            {/* COMPACT: Submit Button */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                disabled={loading}
+                className="
+                  group relative w-full py-3 px-6 
+                  bg-gradient-to-r from-sky-500 to-indigo-500 
+                  hover:from-sky-400 hover:to-indigo-400
+                  text-white font-bold text-lg rounded-xl
+                  shadow-lg shadow-sky-500/30
+                  hover:shadow-[0_0_30px_rgba(56,189,248,0.6)]
+                  transform hover:scale-105 active:scale-95
+                  transition-all duration-300 
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  disabled:hover:scale-100 disabled:hover:shadow-lg
+                  overflow-hidden
+                "
+              >
+                {/* Button shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none"></div>
+                
+                <span className="relative z-10 flex items-center justify-center gap-3">
+                  {loading ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Accessing Portal...
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="w-5 h-5" />
+                      Access Portal
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
+                    </>
+                  )}
+                </span>
+              </button>
             </div>
-            <a href="/forgot-password" className="font-medium text-blue-600 hover:text-blue-500 transition duration-200">
-              Forgot password?
-            </a>
+          </form>
+          
+          {/* COMPACT: Sign Up Link */}
+          <div className="relative z-10 text-center pt-4 border-t border-sky-400/20">
+            <p className="text-slate-400">
+              Don't have an account?{" "}
+              <button
+                onClick={() => navigate('/register')}
+                className="font-bold text-sky-300 hover:text-sky-200 transition-colors duration-300 hover:underline"
+              >
+                Create Account
+              </button>
+            </p>
           </div>
-          
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 flex justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 rounded-xl transition duration-300 ease-in-out shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-          >
-            {loading ? (
-              <span className="flex items-center">
-                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Signing in...
-              </span>
-            ) : (
-              "Sign In"
-            )}
-          </button>
-          
-         
-          
-          <div className="text-center mt-4 text-sm text-gray-600">
-            Don't have an account?{" "}
-            <a href="/register" className="font-medium text-blue-600 hover:text-blue-500 transition duration-200">
-              Sign up now
-            </a>
-          </div>
-        </form>
+        </div>
       </div>
+
+      {/* Custom Styles */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { 
+            transform: translateY(0px) rotate(0deg); 
+            opacity: 0.4; 
+          }
+          50% { 
+            transform: translateY(-20px) rotate(180deg); 
+            opacity: 0.8; 
+          }
+        }
+        .animate-float {
+          animation: float ease-in-out infinite;
+        }
+
+        @keyframes slideInUp {
+          0% {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slideInUp {
+          animation: slideInUp 0.5s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };
