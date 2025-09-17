@@ -51,7 +51,7 @@ const Login = () => {
         const userRole = resultAction.payload.user.role;
         
         if (userRole === 'admin') {
-          navigate('/admin/dashboard');
+          navigate('/admin/main');
         } else if (userRole === 'professor') {
           navigate('/ProfessorDashboard');
         } else {
