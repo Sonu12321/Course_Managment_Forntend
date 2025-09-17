@@ -187,34 +187,6 @@ const Register = () => {
               {/* Left Column */}
               <div className="space-y-4">
                 {/* Email Field */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-bold text-sky-200">
-                    Email Address
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-                      <FaEnvelope className="h-5 w-5 text-sky-400 group-focus-within:text-sky-300 transition-colors duration-300" />
-                    </div>
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      name="email"
-                      value={email}
-                      onChange={handleChange}
-                      className="
-                        relative z-20 w-full pl-12 pr-4 py-3
-                        bg-gradient-to-r from-slate-700/50 to-slate-600/50 
-                        backdrop-blur-sm border border-sky-400/20 
-                        rounded-xl text-white placeholder-slate-400
-                        focus:ring-2 focus:ring-sky-400/50 focus:border-sky-300/50 
-                        hover:border-sky-300/40
-                        transition-all duration-300 
-                        shadow-lg hover:shadow-[0_0_20px_rgba(56,189,248,0.2)]
-                      "
-                      required
-                    />
-                  </div>
-                </div>
 
                 {/* First Name */}
                 <div className="space-y-2">
@@ -232,7 +204,7 @@ const Register = () => {
                       value={firstname}
                       onChange={handleChange}
                       className="
-                        relative z-20 w-full pl-12 pr-4 py-3
+                        relative  w-full pl-12 pr-4 py-3
                         bg-gradient-to-r from-slate-700/50 to-slate-600/50 
                         backdrop-blur-sm border border-sky-400/20 
                         rounded-xl text-white placeholder-slate-400
@@ -246,6 +218,34 @@ const Register = () => {
                   </div>
                 </div>
 
+                <div className="space-y-2">
+                  <label className="block text-sm font-bold text-sky-200">
+                    Email Address
+                  </label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
+                      <FaEnvelope className="h-5 w-5 text-sky-400 group-focus-within:text-sky-300 transition-colors duration-300" />
+                    </div>
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      name="email"
+                      value={email}
+                      onChange={handleChange}
+                      className="
+                        relative  w-full pl-12 pr-4 py-3
+                        bg-gradient-to-r from-slate-700/50 to-slate-600/50 
+                        backdrop-blur-sm border border-sky-400/20 
+                        rounded-xl text-white placeholder-slate-400
+                        focus:ring-2 focus:ring-sky-400/50 focus:border-sky-300/50 
+                        hover:border-sky-300/40
+                        transition-all duration-300 
+                        shadow-lg hover:shadow-[0_0_20px_rgba(56,189,248,0.2)]
+                      "
+                      required
+                    />
+                  </div>
+                </div>
                 {/* Password Field */}
                 <div className="space-y-2">
                   <label className="block text-sm font-bold text-sky-200">
@@ -262,7 +262,7 @@ const Register = () => {
                       value={password}
                       onChange={handleChange}
                       className="
-                        relative z-20 w-full pl-12 pr-12 py-3
+                        relative  w-full pl-12 pr-12 py-3
                         bg-gradient-to-r from-slate-700/50 to-slate-600/50 
                         backdrop-blur-sm border border-sky-400/20 
                         rounded-xl text-white placeholder-slate-400
@@ -310,7 +310,7 @@ const Register = () => {
                       value={lastname}
                       onChange={handleChange}
                       className="
-                        relative z-20 w-full pl-12 pr-4 py-3
+                        relative  w-full pl-12 pr-4 py-3
                         bg-gradient-to-r from-slate-700/50 to-slate-600/50 
                         backdrop-blur-sm border border-sky-400/20 
                         rounded-xl text-white placeholder-slate-400

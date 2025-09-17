@@ -28,9 +28,9 @@ import Search from "./Components/Contianer/Search";
 import ForgotPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
 // Add these imports
-import Certificate from './Components/Certificate/Certificate';
-import VerifyCertificate from './Components/Certificate/VerifyCertificate';
-import CertificatesList from './Components/Certificate/CertificatesList';
+import Certificate from "./Components/Certificate/Certificate";
+import VerifyCertificate from "./Components/Certificate/VerifyCertificate";
+import CertificatesList from "./Components/Certificate/CertificatesList";
 import Trying from "./Components/DashBoardComponents/Trying";
 import AdminMainPage from "./Pages/AdminDashboard/adminMainPage";
 
@@ -42,10 +42,9 @@ function App() {
       <Router>
         <Routes>
           {/* Admin routes with custom layout (no navbar) */}
-          // Add this import at the top with other imports
-          import AdminMainPage from "./Pages/AdminDashboard/adminMainPage";
-          
-          // Then in your admin routes section, add this route
+          // Add this import at the top with other imports import AdminMainPage
+          from "./Pages/AdminDashboard/adminMainPage"; // Then in your admin
+          routes section, add this route
           <Route
             path="/admin/*"
             element={
@@ -53,7 +52,8 @@ function App() {
                 <AdminLayout>
                   <Routes>
                     {/* <Route path="dashboard" element={<AdminDashboard />} /> */}
-                    <Route path="main" element={<AdminMainPage />} /> {/* Add this line */}
+                    <Route path="main" element={<AdminMainPage />} />{" "}
+                    {/* Add this line */}
                     <Route path="users" element={<UserManagement />} />
                     <Route path="courses" element={<CourseManagement />} />
                     {/* Add more admin routes here as needed */}
@@ -62,7 +62,6 @@ function App() {
               </PrivateRoute>
             }
           />
-
           {/* Regular routes with navbar */}
           <Route
             path="*"
@@ -110,9 +109,18 @@ function App() {
                     path="/course-completion/:courseId"
                     element={<CourseCompletionStats />}
                   />
-                  <Route path="/certificate/:certificateId" element={<Certificate />} />
-<Route path="/verify-certificate" element={<VerifyCertificate />} />
-<Route path="/my-certificates" element={<CertificatesList />} />
+                  <Route
+                    path="/certificate/:certificateId"
+                    element={<Certificate />}
+                  />
+                  <Route
+                    path="/verify-certificate"
+                    element={<VerifyCertificate />}
+                  />
+                  <Route
+                    path="/my-certificates"
+                    element={<CertificatesList />}
+                  />
                   // Add this to your existing routes
                   <Route path="/verify-email" element={<VerifyEmail />} />
                   <Route path="/Serch" element={<Search />} />

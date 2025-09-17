@@ -47,17 +47,9 @@ const AdminLayout = ({ children }) => {
         { path: '/admin/main', name: 'Admin Overview', icon: <FaTachometerAlt />, tabId: 'main' },
         // { path: '/admin/dashboard', name: 'Dashboard', icon: <FaChartBar />, tabId: 'overview' },
         { path: '/admin/users', name: 'User Management', icon: <FaUsers />, tabId: 'users' },
-        { path: '/admin/courses', name: 'Course Management', icon: <FaBook />, tabId: 'courses' },
-      ]
+       ]
     },
-    {
-      section: 'Reports',
-      items: [
-        { path: '/admin/financial', name: 'Financial Reports', icon: <FaMoneyBillWave /> },
-        { path: '/admin/analytics', name: 'Analytics', icon: <FaChartLine /> },
-        { path: '/admin/documents', name: 'Documents', icon: <FaFileAlt /> },
-      ]
-    },
+    
    
   ];
 

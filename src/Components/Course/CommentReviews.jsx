@@ -19,15 +19,11 @@ const CommentReviews = ({ courseId, isPurchased }) => {
   const [userComments, setUserComments] = useState([]);
 
   useEffect(() => {
-    // Fetch existing reviews and comments for this course
     const fetchReviewsAndComments = async () => {
       try {
         const token = localStorage.getItem('token');
-        
-        // Use the public endpoint if no token is available
         if (!token) {
           const response = await axios.get(`https://course-creation-backend.onrender.com/api/students/course/${courseId}`);
-          
           if (response.data.success) {
             setExistingReviews(response.data.reviews || []);
             setExistingComments(response.data.comments || []);
@@ -35,76 +31,41 @@ const CommentReviews = ({ courseId, isPurchased }) => {
           setLoading(false);
           return;
         }
-
-        // If token exists, use the authenticated endpoint
         const response = await axios.get(`https://course-creation-backend.onrender.com/api/students/course/${courseId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
-
         if (response.data.success) {
           setExistingReviews(response.data.reviews || []);
           setExistingComments(response.data.comments || []);
-          
-          // Set user-specific data
           setUserHasReviewed(response.data.hasUserReviewed || false);
           setUserReview(response.data.userReview || null);
           setUserComments(response.data.userComments || []);
-          
-          // If user has already reviewed, pre-fill the review form
           if (response.data.userReview) {
             setRating(response.data.userReview.rating || 0);
             setReviewComment(response.data.userReview.comment || '');
           }
         }
-      } catch (error) {
-        console.error('Error fetching reviews and comments:', error);
-        // Don't set error here as it might not be critical
-      } finally {
-        setLoading(false);
-      }
+      } catch { }
+      finally { setLoading(false); }
     };
 
-    if (courseId) {
-      fetchReviewsAndComments();
-    }
+    if (courseId) fetchReviewsAndComments();
   }, [courseId]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    
-    if (!comment.trim()) {
-      setError('Please enter a comment');
-      return;
-    }
-    
+    if (!comment.trim()) { setError('Please enter a comment'); return; }
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Authentication required. Please log in.');
-        return;
-      }
-      
-      const response = await axios.post('https://course-creation-backend.onrender.com/api/students/course-interaction', 
-        { 
-          courseId, 
-          comment,
-          interactionType: 'comment'
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      if (!token) { setError('Authentication required. Please log in.'); return; }
+      const response = await axios.post('https://course-creation-backend.onrender.com/api/students/course-interaction',
+        { courseId, comment, interactionType: 'comment' },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      
       if (response.data.success) {
         setCommentSuccess('Your comment has been added successfully!');
         setComment('');
-        
-        // Add the new comment to the existing comments
         const newComment = {
           _id: response.data.comment._id || Date.now().toString(),
           user: response.data.comment.user,
@@ -112,59 +73,29 @@ const CommentReviews = ({ courseId, isPurchased }) => {
           createdAt: response.data.comment.createdAt,
           rating: 0
         };
-        
         setExistingComments([newComment, ...existingComments]);
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          setCommentSuccess(null);
-        }, 3000);
+        setTimeout(() => { setCommentSuccess(null); }, 2500);
       }
     } catch (error) {
-      console.error('Error submitting comment:', error);
       setError(error.response?.data?.message || 'Error submitting comment. Please try again.');
     }
   };
-  
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    
-    if (rating === 0) {
-      setError('Please select a rating');
-      return;
-    }
-    
-    if (!reviewComment.trim()) {
-      setError('Please enter a review comment');
-      return;
-    }
-    
+    if (rating === 0) { setError('Please select a rating'); return; }
+    if (!reviewComment.trim()) { setError('Please enter a review comment'); return; }
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Authentication required. Please log in.');
-        return;
-      }
-      
-      const response = await axios.post('https://course-creation-backend.onrender.com/api/students/review', 
-        { 
-          courseId, 
-          rating,
-          comment: reviewComment
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      if (!token) { setError('Authentication required. Please log in.'); return; }
+      const response = await axios.post('https://course-creation-backend.onrender.com/api/students/review',
+        { courseId, rating, comment: reviewComment },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      
       if (response.data.success) {
-        setReviewSuccess(userHasReviewed ? 'Your review has been updated successfully!' : 'Your review has been submitted successfully!');
+        setReviewSuccess(userHasReviewed ? 'Your review has been updated!' : 'Your review has been submitted!');
         setUserHasReviewed(true);
-        
-        // Add the new review to the existing reviews or update if exists
         const newReview = {
           _id: response.data.review._id || Date.now().toString(),
           user: response.data.review.user,
@@ -172,82 +103,70 @@ const CommentReviews = ({ courseId, isPurchased }) => {
           rating: response.data.review.rating,
           createdAt: response.data.review.createdAt
         };
-        
-        // Update userReview state
         setUserReview(newReview);
-        
-        // Check if this user already has a review
         const existingReviewIndex = existingReviews.findIndex(
           review => review.user._id === response.data.review.user
         );
-        
         if (existingReviewIndex !== -1) {
-          // Update existing review
           const updatedReviews = [...existingReviews];
           updatedReviews[existingReviewIndex] = newReview;
           setExistingReviews(updatedReviews);
         } else {
-          // Add new review
           setExistingReviews([newReview, ...existingReviews]);
         }
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          setReviewSuccess(null);
-        }, 3000);
+        setTimeout(() => { setReviewSuccess(null); }, 2500);
       }
     } catch (error) {
-      console.error('Error submitting review:', error);
       setError(error.response?.data?.message || 'Error submitting review. Please try again.');
     }
   };
 
   const formatDate = (dateString) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-violet-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-      <div className="p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Reviews & Comments</h2>
-        
-        {/* Error message */}
+    <div className="bg-gradient-to-br from-purple-900/60 via-slate-900/80 to-violet-800/90 rounded-3xl shadow-2xl border border-violet-700/20 overflow-hidden mb-12 p-1.5">
+      <div className="px-8 py-8 relative backdrop-blur-lg">
+        <h2 className="text-3xl font-bold mb-8 text-violet-200 tracking-wide">
+          Reviews & Comments
+        </h2>
+
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-900/20 border border-red-400 text-red-300 px-4 py-3 rounded-2xl mb-4 shadow">
             {error}
           </div>
         )}
-        
+
         {isPurchased ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-            {/* Review Form */}
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold mb-3 text-gray-700">
+          <div className="flex flex-col md:flex-row gap-8 transition-all">
+            {/* REVIEW FORM */}
+            <div className="flex-1 bg-slate-900/60 rounded-2xl border border-violet-700/30 shadow-lg p-6 animate-fadeInUp select-none">
+              <h3 className="text-xl font-semibold mb-4 text-white/90">
                 {userHasReviewed ? 'Update Your Review' : 'Add a Review'}
               </h3>
               {reviewSuccess && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-2 rounded mb-4">
+                <div className="bg-green-800/20 border border-green-300 text-green-200 py-2 px-4 rounded-xl mb-3 text-center">
                   {reviewSuccess}
                 </div>
               )}
               <form onSubmit={handleReviewSubmit}>
-                <div className="flex items-center mb-3">
-                  <p className="mr-3 text-gray-700">Rating: <span className="text-red-500">*</span></p>
-                  <div className="flex">
-                    {[...Array(5)].map((_, index) => {
-                      const ratingValue = index + 1;
+                <div className="flex items-center mb-5">
+                  <span className="mr-3 text-violet-300 text-lg font-semibold">Rating<span className="text-pink-500">*</span>:</span>
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, idx) => {
+                      const ratingValue = idx + 1;
                       return (
-                        <label key={index} className="cursor-pointer">
+                        <label key={idx} className="cursor-pointer">
                           <input
                             type="radio"
                             name="rating"
@@ -256,9 +175,10 @@ const CommentReviews = ({ courseId, isPurchased }) => {
                             onClick={() => setRating(ratingValue)}
                           />
                           <FaStar
-                            className="mr-1"
-                            size={24}
-                            color={ratingValue <= (hover || rating) ? "#FFD700" : "#e4e5e9"}
+                            className="transition-all drop-shadow"
+                            size={28}
+                            color={ratingValue <= (hover || rating) ? "#c084fc" : "#3b314c"}
+                            style={{ filter: ratingValue <= (hover || rating) ? 'drop-shadow(0 0 8px #c084fc)' : '' }}
                             onMouseEnter={() => setHover(ratingValue)}
                             onMouseLeave={() => setHover(0)}
                           />
@@ -268,127 +188,110 @@ const CommentReviews = ({ courseId, isPurchased }) => {
                   </div>
                 </div>
                 <textarea
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-4 mb-3 border-0 rounded-xl bg-slate-800/60 text-white outline-none focus:ring-2 focus:ring-violet-400"
                   rows="4"
                   placeholder="Write your review here..."
                   value={reviewComment}
                   onChange={(e) => setReviewComment(e.target.value)}
-                ></textarea>
+                />
                 <button
                   type="submit"
-                  className="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200"
-                >
-                  {userHasReviewed ? 'Update Review' : 'Submit Review'}
-                </button>
+                  className="w-full rounded-xl px-4 py-2 mt-1 bg-gradient-to-r from-fuchsia-600 via-violet-700 to-pink-700 hover:from-indigo-700 hover:to-fuchsia-600 text-white font-semibold text-lg shadow-xl hover:scale-105 transition-all"
+                >{userHasReviewed ? 'Update Review' : 'Submit Review'}</button>
               </form>
             </div>
+            {/* COMMENT FORM */}
+          
           </div>
         ) : (
-          <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-6 py-4 rounded-lg mb-6">
-            <div className="flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <p className="font-medium">You need to purchase this course to add reviews or comments.</p>
-            </div>
+          <div className="bg-yellow-600/10 border border-yellow-400/30 text-yellow-300 px-6 py-4 rounded-2xl mb-6 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <span className="font-medium">Purchase this course to review or comment.</span>
           </div>
         )}
-        
-        {/* Display Reviews */}
+
+        {/* REVIEWS LIST */}
         {existingReviews.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Course Reviews</h3>
-            <div className="space-y-4">
+          <div className="mt-10">
+            <h3 className="text-2xl font-semibold mb-6 text-pink-200">Course Reviews</h3>
+            <div className="space-y-8">
               {existingReviews.map((review) => (
-                <div key={review._id} className="border-b border-gray-200 pb-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0">
-                        {review.user.profileImage ? (
-                          <img 
-                            src={review.user.profileImage} 
-                            alt={`${review.user.firstname} ${review.user.lastname}`} 
-                            className="h-10 w-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <span className="text-blue-600 font-medium">
-                              {review.user.firstname?.charAt(0)}{review.user.lastname?.charAt(0)}
-                            </span>
-                          </div>
-                        )}
+                <div key={review._id} className="bg-slate-900/50 border border-violet-700/30 rounded-2xl px-6 py-5 shadow flex gap-4 items-center">
+                  <div className="flex-shrink-0">
+                    {review.user.profileImage ? (
+                      <img
+                        src={review.user.profileImage}
+                        alt={`${review.user.firstname} ${review.user.lastname}`}
+                        className="h-12 w-12 rounded-full object-cover border-2 border-violet-400 shadow"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-violet-500 flex items-center justify-center text-xl font-bold text-white border-2 border-violet-700 shadow">
+                        {review.user.firstname?.charAt(0)}{review.user.lastname?.charAt(0)}
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-800">
-                          {review.user.firstname} {review.user.lastname}
-                        </p>
-                        <div className="flex items-center mt-1">
-                          {[...Array(5)].map((_, index) => (
-                            <FaStar 
-                              key={index}
-                              className="mr-1" 
-                              size={16} 
-                              color={index < review.rating ? "#FFD700" : "#e4e5e9"} 
-                            />
-                          ))}
-                          <span className="text-sm text-gray-500 ml-2">
-                            {formatDate(review.createdAt)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                  <p className="mt-2 text-gray-600">{review.comment}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-4 mb-1">
+                      <span className="font-semibold text-lg text-violet-200 truncate">{review.user.firstname} {review.user.lastname}</span>
+                      <span className="text-xs text-violet-400 uppercase tracking-wider">{formatDate(review.createdAt)}</span>
+                    </div>
+                    <div className="flex gap-1 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar
+                          key={i}
+                          size={18}
+                          color={i < review.rating ? "#facc15" : "#4b3b74"}
+                          className={i < review.rating ? "drop-shadow-glow" : ""}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-gray-200">{review.comment}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
-        
-        {/* Display Comments */}
+
+        {/* COMMENTS LIST */}
         {existingComments.length > 0 && (
-          <div className="mt-8">
-            <h3 className="text-xl font-semibold mb-4 text-gray-800">Course Comments</h3>
-            <div className="space-y-4">
+          <div className="mt-10">
+            <h3 className="text-2xl font-semibold mb-6 text-fuchsia-200">Course Comments</h3>
+            <div className="space-y-8">
               {existingComments.map((comment) => (
-                <div key={comment._id} className="border-b border-gray-200 pb-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex items-start space-x-3">
-                      <div className="flex-shrink-0">
-                        {comment.user.profileImage ? (
-                          <img 
-                            src={comment.user.profileImage} 
-                            alt={`${comment.user.firstname} ${comment.user.lastname}`} 
-                            className="h-10 w-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                            <span className="text-blue-600 font-medium">
-                              {comment.user.firstname?.charAt(0)}{comment.user.lastname?.charAt(0)}
-                            </span>
-                          </div>
-                        )}
+                <div key={comment._id} className="bg-slate-900/40 border border-pink-700/30 rounded-2xl px-6 py-5 shadow flex gap-4 items-center">
+                  <div className="flex-shrink-0">
+                    {comment.user.profileImage ? (
+                      <img
+                        src={comment.user.profileImage}
+                        alt={`${comment.user.firstname} ${comment.user.lastname}`}
+                        className="h-12 w-12 rounded-full object-cover border-2 border-pink-400 shadow"
+                      />
+                    ) : (
+                      <div className="h-12 w-12 rounded-full bg-pink-600 flex items-center justify-center text-xl font-bold text-white border-2 border-pink-700 shadow">
+                        {comment.user.firstname?.charAt(0)}{comment.user.lastname?.charAt(0)}
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-800">
-                          {comment.user.firstname} {comment.user.lastname}
-                        </p>
-                        <span className="text-sm text-gray-500">
-                          {formatDate(comment.createdAt)}
-                        </span>
-                      </div>
-                    </div>
+                    )}
                   </div>
-                  <p className="mt-2 text-gray-600">{comment.comment}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-4 mb-1">
+                      <span className="font-semibold text-lg text-pink-200 truncate">{comment.user.firstname} {comment.user.lastname}</span>
+                      <span className="text-xs text-pink-300 uppercase tracking-wider">{formatDate(comment.createdAt)}</span>
+                    </div>
+                    <p className="text-gray-200">{comment.comment}</p>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
-        
+
+        {/* EMPTY STATE */}
         {existingReviews.length === 0 && existingComments.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <p>No reviews or comments yet. Be the first to share your thoughts!</p>
+          <div className="text-center py-12 mt-8 text-violet-300/80 italic text-lg font-medium">
+            No reviews or comments yet. Be the <span className="text-pink-300 font-bold">first</span> to share your thoughts!
           </div>
         )}
       </div>

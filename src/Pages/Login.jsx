@@ -171,7 +171,7 @@ const Login = () => {
                   value={form.email}
                   onChange={handleChange}
                   className="
-                    relative z-20 w-full pl-12 pr-4 py-3
+                    relative  w-full pl-12  py-3
                     bg-gradient-to-r from-slate-700/50 to-slate-600/50 
                     backdrop-blur-sm border border-sky-400/20 
                     rounded-xl text-white placeholder-slate-400
@@ -201,10 +201,10 @@ const Login = () => {
                   value={form.password}
                   onChange={handleChange}
                   className="
-                    relative z-20 w-full pl-12 pr-12 py-3
+                    relative  w-full pl-12 pr-12 py-3
                     bg-gradient-to-r from-slate-700/50 to-slate-600/50 
                     backdrop-blur-sm border border-sky-400/20 
-                    rounded-xl text-white placeholder-slate-400
+                    rounded-xl text-black placeholder-slate-400
                     focus:ring-2 focus:ring-sky-400/50 focus:border-sky-300/50 
                     hover:border-sky-300/40
                     transition-all duration-300 

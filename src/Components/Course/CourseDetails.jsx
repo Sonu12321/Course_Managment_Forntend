@@ -1,525 +1,386 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import CommentReviews from './CommentReviews';
 import CoursePurchaseController from './CoursePurchaseController';
 import CourseProgress from './CourseProgress';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { Link } from 'react-router-dom';
 
 function CourseDetails() {
-    const [course, setCourse] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [selectedVideo, setSelectedVideo] = useState(null);
-    const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-    const [videoEnded, setVideoEnded] = useState(false);
-    const [certificate, setCertificate] = useState(null);
-    const [completedVideos, setCompletedVideos] = useState([]);
-    const { courseId } = useParams();
-    const navigate = useNavigate();
-    const API_BASE_URL = 'https://course-creation-backend.onrender.com/api';
-    const progressUpdateTimeout = useRef(null);
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [certificate, setCertificate] = useState(null);
+  const [completedVideos, setCompletedVideos] = useState([]);
+  const { courseId } = useParams();
+  const navigate = useNavigate();
+  const API_BASE_URL = 'https://course-creation-backend.onrender.com/api';
+  const progressUpdateTimeout = useRef(null);
 
-    const fetchCourseDetails = async () => {
+  // Fetch course details
+  const fetchCourseDetails = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required. Please log in.');
+        setLoading(false);
+        return;
+      }
+      const response = await axios.get(`${API_BASE_URL}/courses/courses/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const courseData = response.data.course;
+      setCourse(courseData);
+      setSelectedVideo({
+        title: 'Course Preview',
+        url: courseData.previewVideo,
+        description: 'Preview of the course content',
+        isPreview: true
+      });
+    } catch {
+      setError('Error fetching course details. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourseDetails();
+  }, [courseId]);
+
+  // Fetch progress and certificate
+  useEffect(() => {
+    if (course?.isPurchased) {
+      const fetchProgress = async () => {
         try {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                setError('Authentication required. Please log in.');
-                setLoading(false);
-                return;
-            }
+          const response = await axios.get(
+            `${API_BASE_URL}/progress/course/${courseId}`,
+            { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+          );
+          if (response.data.success && response.data.progress) {
+            const watchedUrls = response.data.progress.watchedVideos || [];
+            const completed = course.videos.filter(video => watchedUrls.includes(video.url)).map(video => video._id);
+            setCompletedVideos(completed);
+          }
+        } catch {}
+      };
+      fetchProgress();
 
-            const response = await axios.get(`${API_BASE_URL}/courses/courses/${courseId}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            const courseData = response.data.course;
-            setCourse(courseData);
-
-            setSelectedVideo({
-                title: 'Course Preview',
-                url: courseData.previewVideo,
-                description: 'Preview of the course content',
-                isPreview: true
-            });
-        } catch (error) {
-            console.error('Error fetching course details:', error);
-            setError('Error fetching course details. Please try again later.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchCourseDetails();
-    }, [courseId]);
-
-    useEffect(() => {
-        if (course?.isPurchased) {
-            const fetchProgress = async () => {
-                try {
-                    const response = await axios.get(
-                        `https://course-creation-backend.onrender.com/api/progress/course/${courseId}`,
-                        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-                    );
-
-                    if (response.data.success && response.data.progress) {
-                        // Extract completed videos from watchedVideos array
-                        const watchedUrls = response.data.progress.watchedVideos || [];
-                        
-                        // Find the video IDs that match the watched URLs
-                        const completed = course.videos
-                            .filter(video => watchedUrls.includes(video.url))
-                            .map(video => video._id);
-                        
-                        setCompletedVideos(completed);
-                    }
-                } catch (error) {
-                    console.error('Error fetching progress:', error);
-                }
-            };
-            fetchProgress();
-            
-            // Add certificate check
-            const checkCertificate = async () => {
-                const token = localStorage.getItem('token');
-                if (token) {
-                    try {
-                        const certResponse = await axios.get(
-                            `https://course-creation-backend.onrender.com/api/certificates/course/${courseId}`,
-                            {
-                                headers: { Authorization: `Bearer ${token}` }
-                            }
-                        );
-                        
-                        if (certResponse.data.success) {
-                            setCertificate(certResponse.data.certificate);
-                        }
-                    } catch (error) {
-                        // Certificate might not exist yet, which is fine
-                        console.log('No certificate found for this course');
-                    }
-                }
-            };
-            checkCertificate();
-        }
-    }, [courseId, course?.isPurchased, course?.videos]);
-
-    const handleVideoSelect = (video, index) => {
-        setSelectedVideo({ ...video, index: index + 1, isPreview: false });
-        setVideoEnded(false);
-    };
-
-    const handlePreviewSelect = () => {
-        if (course) {
-            setSelectedVideo({
-                title: 'Course Preview',
-                url: course.previewVideo,
-                description: 'Preview of the course content',
-                isPreview: true
-            });
-            setVideoEnded(false);
-        }
-    };
-
-    const handleEnrollNow = () => setShowPurchaseModal(true);
-
-    const handlePurchaseComplete = () => {
-        fetchCourseDetails();
-        setShowPurchaseModal(false);
-    };
-
-    const handleVideoEnded = () => setVideoEnded(true);
-
-    const handleVideoProgress = async (watchTime) => {
-        if (!selectedVideo || selectedVideo.isPreview || !course?.isPurchased) return;
-
+      const checkCertificate = async () => {
         try {
-            if (progressUpdateTimeout.current) clearTimeout(progressUpdateTimeout.current);
+          const token = localStorage.getItem('token');
+          if (token) {
+            const certResponse = await axios.get(
+              `${API_BASE_URL}/certificates/course/${courseId}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (certResponse.data.success) setCertificate(certResponse.data.certificate);
+          }
+        } catch {}
+      };
+      checkCertificate();
+    }
+  }, [courseId, course?.isPurchased, course?.videos]);
 
-            progressUpdateTimeout.current = setTimeout(async () => {
-                // Mark video as watched when user has watched enough of it (e.g., 80% or more)
-                // You can adjust this threshold as needed
-                const videoElement = document.querySelector('video');
-                if (videoElement && (watchTime / videoElement.duration) >= 0.8) {
-                    const response = await axios.post(
-                        'https://course-creation-backend.onrender.com/api/progress/mark-watched',
-                        { 
-                            courseId: course._id, 
-                            videoUrl: selectedVideo.url 
-                        },
-                        { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
-                    );
+  const handleVideoSelect = (video, index) => setSelectedVideo({ ...video, index: index + 1, isPreview: false });
 
-                    if (response.data.success) {
-                        // Update completed videos list
-                        if (!completedVideos.includes(selectedVideo._id)) {
-                            setCompletedVideos(prev => [...prev, selectedVideo._id]);
-                        }
-                        
-                        toast.success('Progress saved', {
-                            position: 'bottom-right',
-                            autoClose: 2000,
-                            hideProgressBar: true,
-                            closeOnClick: true,
-                            pauseOnHover: false,
-                            draggable: true
-                        });
-                    }
-                }
-            }, 3000);
-        } catch (error) {
-            console.error('Error updating video progress:', error);
-            toast.error('Failed to save progress');
+  const handlePreviewSelect = () => {
+    if (course) {
+      setSelectedVideo({
+        title: 'Course Preview',
+        url: course.previewVideo,
+        description: 'Preview of the course content',
+        isPreview: true
+      });
+    }
+  };
+
+  const handleVideoProgress = async (watchTime) => {
+    if (!selectedVideo || selectedVideo.isPreview || !course?.isPurchased) return;
+    try {
+      if (progressUpdateTimeout.current) clearTimeout(progressUpdateTimeout.current);
+      progressUpdateTimeout.current = setTimeout(async () => {
+        const videoElement = document.querySelector('video');
+        if (videoElement && (watchTime / videoElement.duration) >= 0.8) {
+          const response = await axios.post(
+            `${API_BASE_URL}/progress/mark-watched`,
+            { courseId: course._id, videoUrl: selectedVideo.url },
+            { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
+          );
+          if (response.data.success && !completedVideos.includes(selectedVideo._id)) {
+            setCompletedVideos(prev => [...prev, selectedVideo._id]);
+            toast.success('Progress saved 🎉', { position: 'bottom-right', autoClose: 2000 });
+          }
         }
-    };
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center min-h-screen">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        );
+      }, 3000);
+    } catch {
+      toast.error('Failed to save progress');
     }
+  };
 
-    if (error) {
-        return (
-            <div className="min-h-screen flex justify-center items-center">
-                <div className="bg-red-50 p-6 rounded-lg shadow-md max-w-2xl w-full">
-                    <h2 className="text-red-600 text-xl font-semibold mb-4">Error</h2>
-                    <p className="text-gray-700">{error}</p>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
-                    >
-                        Go Back
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    if (!course) {
-        return (
-            <div className="min-h-screen flex justify-center items-center">
-                <div className="bg-yellow-50 p-6 rounded-lg shadow-md max-w-2xl w-full">
-                    <h2 className="text-yellow-600 text-xl font-semibold mb-4">Course Not Found</h2>
-                    <p className="text-gray-700">The requested course could not be found.</p>
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
-                    >
-                        Go Back
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
+  if (loading)
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
-            <ToastContainer />
-            <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden mb-10">
-                <div className="relative">
-                    <img 
-                        src={course.thumbnail || 'https://via.placeholder.com/1200x400?text=Course+Thumbnail'} 
-                        alt={course.title} 
-                        className="w-full h-64 sm:h-80 md:h-96 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent flex flex-col justify-end">
-                        <div className="p-6 sm:p-8 text-white">
-                            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 drop-shadow-md">{course.title}</h1>
-                            <p className="text-lg sm:text-xl opacity-90 mb-3 drop-shadow-sm">Category: {course.category}</p>
-                            <div className="flex flex-wrap items-center gap-3">
-                                <p className="bg-blue-600 hover:bg-blue-700 transition-colors px-4 py-2 rounded-lg text-sm font-semibold shadow-md">
-                                    ${course.price.toFixed(2)}
-                                </p>
-                                <p className="bg-green-600 hover:bg-green-700 transition-colors px-4 py-2 rounded-lg text-sm font-semibold shadow-md">
-                                    Duration: {course.duration}
-                                </p>
-                                {course.isPurchased && (
-                                    <p className="flex items-center bg-teal-500 px-4 py-2 rounded-lg text-sm font-semibold shadow-md">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 00-5.516 0 3.066 3.066 0 00-1.03 2.288A3.066 3.066 0 003.067 9.5l.003.001.003.001.002.001.001.001L10 16.25l6.928-6.748.001-.001.002-.001.003-.001.003-.001a3.066 3.066 0 003.067-3.757 3.066 3.066 0 00-1.03-2.288 3.066 3.066 0 00-5.516 0c-.18-.024-.362-.04-.546-.052A3.066 3.066 0 0010 3.455z" clipRule="evenodd" />
-                                        </svg>
-                                        Purchased
-                                    </p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {course.isPurchased && (
-                <div className="max-w-6xl mx-auto -mt-6 mb-8 z-10 relative">
-                    <div className="bg-white rounded-xl shadow-md p-4 flex justify-between items-center">
-                        <div className="flex items-center space-x-4">
-                            <div className="bg-blue-100 p-3 rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 className="font-medium text-gray-800">Your Progress</h3>
-                                <p className="text-sm text-gray-500">
-                                    {completedVideos.length} of {course.videos.length} videos completed
-                                </p>
-                            </div>
-                        </div>
-                        <div className="w-48">
-                            <div className="relative pt-1">
-                                <div className="overflow-hidden h-2 text-xs flex rounded bg-blue-200">
-                                    <div
-                                        style={{ width: `${(completedVideos.length / course.videos.length) * 100}%` }}
-                                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"
-                                    ></div>
-                                </div>
-                            </div>
-                        </div>
-                        <button
-                            onClick={() => document.getElementById('course-progress-section').scrollIntoView({ behavior: 'smooth' })}
-                            className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-150"
-                        >
-                            View Details
-                        </button>
-                    </div>
-                </div>
-            )}
-
-  
-            {course.isPurchased && certificate && (
-                <div className="max-w-6xl mx-auto -mt-3 mb-8 z-10 relative">
-                    <div className="bg-green-50 rounded-xl shadow-md p-4 border border-green-200 flex justify-between items-center">
-                        <div className="flex items-center space-x-4">
-                            <div className="bg-green-100 p-3 rounded-full">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h3 className="font-medium text-gray-800">Course Completed!</h3>
-                                <p className="text-sm text-gray-600">
-                                    You've earned a certificate for this course
-                                </p>
-                            </div>
-                        </div>
-                        <Link
-                            to={`/certificate/${certificate.certificateId}`}
-                            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors duration-150"
-                        >
-                            View Certificate
-                        </Link>
-                    </div>
-                </div>
-            )}
-
-            <div className="max-w-6xl mx-auto mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="md:col-span-1">
-                        <div className="bg-white rounded-xl shadow-md p-6">
-                            <h2 className="text-xl font-semibold mb-4 text-gray-800">About This Course</h2>
-                            <p className="text-gray-600 leading-relaxed mb-6">{course.description}</p>
-                            <h2 className="text-xl font-semibold mb-4 text-gray-800">Instructor</h2>
-                            <div className="flex items-center space-x-4 mb-6">
-                                <div className="bg-blue-100 p-3 rounded-full">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <p className="font-medium text-gray-800">
-                                        {course.instructor.firstname} {course.instructor.lastname}
-                                    </p>
-                                    <p className="text-gray-500 text-sm">{course.instructor.email}</p>
-                                </div>
-                            </div>
-                            {course.isPurchased ? (
-                                <>
-                                    <div className="bg-green-50 p-4 rounded-lg border border-green-200 mb-4">
-                                        <div className="flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                            </svg>
-                                            <p className="text-green-700 font-medium">You have purchased this course</p>
-                                        </div>
-                                    </div>
-                                    <div id="course-progress-section" className="mt-6">
-                                        <CourseProgress courseId={course._id} />
-                                    </div>
-                                </>
-                            ) : (
-                                <button
-                                    onClick={handleEnrollNow}
-                                    className="w-full bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200"
-                                >
-                                    Enroll Now - ${course.price.toFixed(2)}
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                    <div className="md:col-span-2">
-                        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                            <div className="bg-black">
-                                <div className="relative w-full" style={{ height: '400px' }}>
-                                    <video
-                                        src={selectedVideo?.url}
-                                        controls
-                                        className="w-full h-full object-contain"
-                                        poster={selectedVideo?.isPreview ? course.thumbnail : null}
-                                        preload="metadata"
-                                        controlsList="nodownload"
-                                        onEnded={handleVideoEnded}
-                                        onTimeUpdate={(e) => handleVideoProgress(Math.floor(e.target.currentTime))}
-                                    >
-                                        Your browser does not support the video tag.
-                                    </video>
-                                    {selectedVideo?.isPreview && (
-                                        <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
-                                            Preview
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="p-4 border-b border-gray-200">
-                                <div className="flex justify-between items-center">
-                                    <h3 className="text-xl font-semibold text-gray-800">
-                                        {selectedVideo?.isPreview ? 'Course Preview' : `${selectedVideo?.index}. ${selectedVideo?.title}`}
-                                    </h3>
-                                </div>
-                                <p className="text-gray-600 mt-1">{selectedVideo?.description}</p>
-                            </div>
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold mb-4 text-gray-800">Course Content</h3>
-                                {!course.isPurchased && course.videos.length === 0 && (
-                                    <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-4">
-                                        <div className="flex items-center">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                            </svg>
-                                            <p className="text-yellow-700 font-medium">Purchase this course to access all videos</p>
-                                        </div>
-                                    </div>
-                                )}
-                                <div className="divide-y divide-gray-200">
-                                    <div
-                                        className={`p-3 hover:bg-gray-50 transition-colors duration-150 cursor-pointer ${selectedVideo?.isPreview ? 'bg-blue-50' : ''}`}
-                                        onClick={handlePreviewSelect}
-                                    >
-                                        <div className="flex justify-between items-center">
-                                            <div className="flex items-start space-x-3">
-                                                <div className={`${selectedVideo?.isPreview ? 'text-blue-600' : 'text-blue-500'} mt-1`}>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h3 className={`font-medium ${selectedVideo?.isPreview ? 'text-blue-600' : 'text-gray-800'}`}>Course Preview</h3>
-                                                    <p className="text-gray-500 text-sm">Introduction to the course</p>
-                                                </div>
-                                            </div>
-                                            <div className="text-gray-500 text-sm flex items-center">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                Preview
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {course.videos && course.videos.length > 0 ? (
-                                        course.videos.map((video, index) => {
-                                            const isCompleted = completedVideos.includes(video._id);
-                                            return (
-                                                <div
-                                                    key={index}
-                                                    className={`p-3 hover:bg-gray-50 transition-colors duration-150 cursor-pointer ${selectedVideo?.index === index + 1 ? 'bg-blue-50' : ''} ${isCompleted ? 'border-l-4 border-green-500' : ''}`}
-                                                    onClick={() => handleVideoSelect(video, index)}
-                                                >
-                                                    <div className="flex justify-between items-center">
-                                                        <div className="flex items-start space-x-3">
-                                                            <div className={`${selectedVideo?.index === index + 1 ? 'text-blue-600' : isCompleted ? 'text-green-500' : 'text-blue-500'} mt-1`}>
-                                                                {isCompleted ? (
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                                                    </svg>
-                                                                ) : (
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                                                                    </svg>
-                                                                )}
-                                                            </div>
-                                                            <div>
-                                                                <h3 className={`font-medium ${selectedVideo?.index === index + 1 ? 'text-blue-600' : 'text-gray-800'}`}>
-                                                                    {index + 1}. {video.title}
-                                                                </h3>
-                                                                <p className="text-gray-500 text-sm">{video.description}</p>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center space-x-2">
-                                                            {isCompleted && (
-                                                                <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                                                    Completed
-                                                                </span>
-                                                            )}
-                                                            <div className="text-gray-500 text-sm flex items-center">
-                                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                </svg>
-                                                                {parseFloat(video.duration).toFixed(2)} min
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
-                                    ) : !course.isPurchased && (
-                                        <div className="p-3 text-center text-gray-500">
-                                            <p>Purchase this course to access all {course.videos?.length || 'the'} videos</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {showPurchaseModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                            <h2 className="text-xl font-semibold">Purchase Course</h2>
-                            <button
-                                onClick={() => setShowPurchaseModal(false)}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div className="p-6">
-                            <div className="mb-6">
-                                <h3 className="font-medium text-gray-900 mb-1">{course.title}</h3>
-                                <p className="text-gray-500 text-sm">{course.category} • {course.duration}</p>
-                            </div>
-                            <CoursePurchaseController
-                                courseId={courseId}
-                                price={course.price}
-                                onPurchaseComplete={handlePurchaseComplete}
-                            />
-                        </div>
-                    </div>
-                </div>
-            )}
-            {course && (
-                <div className="max-w-6xl mx-auto">
-                    <CommentReviews courseId={courseId} isPurchased={course.isPurchased} />
-                </div>
-            )}
-        </div>
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-violet-400 drop-shadow-glow" />
+      </div>
     );
+
+  if (error)
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+        <div className="bg-red-900/30 backdrop-blur-lg border border-red-500/80 p-8 rounded-3xl shadow-2xl max-w-md w-full text-white">
+          <h2 className="text-3xl font-bold text-red-400 mb-4">Error</h2>
+          <p className="mb-6 text-lg tracking-wide">{error}</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-gradient-to-r from-pink-500 to-red-500 py-3 px-8 rounded-2xl font-semibold shadow-xl hover:scale-105 transition-transform duration-300"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+
+  if (!course)
+    return (
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
+        <div className="bg-yellow-900/30 backdrop-blur-lg border border-yellow-400/70 p-8 rounded-3xl shadow-2xl max-w-md w-full text-white text-center">
+          <h2 className="text-3xl font-bold text-yellow-300 mb-4">Course Not Found</h2>
+          <p className="mb-6 text-lg tracking-wide">The requested course could not be found.</p>
+          <button
+            onClick={() => navigate(-1)}
+            className="bg-gradient-to-r from-yellow-400 to-amber-600 py-3 px-8 rounded-2xl font-semibold shadow-xl hover:scale-105 transition-transform duration-300"
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden py-10 px-6 md:px-10">
+      <ToastContainer />
+      {/* Hero Section */}
+      <section className="mx-auto max-w-6xl -mb-10">
+        <div className="relative z-20 bg-slate-900/85 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row items-center border border-slate-600/20 hover:shadow-[0_0_24px_rgba(192,132,252,0.85)] transition-shadow duration-500">
+          <img
+            src={course.thumbnail || 'https://via.placeholder.com/1200x400?text=Course+Thumbnail'}
+            alt={course.title}
+            className="md:w-2/5 w-full h-72 object-cover brightness-[0.75]"
+            loading="lazy"
+            draggable={false}
+          />
+          <div className="flex-1 px-8 py-12 flex flex-col justify-center gap-4 text-left text-white select-none">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-violet-400 tracking-tight drop-shadow-xl">
+              {course.title}
+            </h1>
+            <p className="text-xl text-gray-300 tracking-wide max-w-3xl">{course.category}</p>
+            <p className="text-lg text-gray-400 max-w-3xl">{course.description}</p>
+
+            <div className="flex items-center gap-6 mt-6">
+              <div className="flex flex-col items-center justify-center text-violet-300 text-sm select-text">
+                <span className="text-xs uppercase tracking-widest font-semibold">Duration</span>
+                <span className="font-medium text-white">{course.duration}</span>
+              </div>
+              {course.isPurchased && (
+                <span className="rounded-3xl bg-gradient-to-r from-teal-500 to-teal-700 py-2 px-6 text-white font-semibold shadow-md shadow-teal-400 select-none">
+                  Purchased
+                </span>
+              )}
+              {!course.isPurchased && (
+                <button
+                  onClick={() => setShowPurchaseModal(true)}
+                  className="ml-auto rounded-3xl py-3 px-8 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-pink-600 hover:scale-105 shadow-lg hover:shadow-pink-500 transition-transform duration-300 font-bold text-white select-none"
+                >
+                  Enroll Now &mdash; ${course.price.toFixed(2)}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="max-w-7xl mx-auto mt-24 flex flex-col md:flex-row gap-12">
+        {/* Left: Video + Course Content */}
+        <article className="flex-1 space-y-8 bg-slate-900/70 border border-violet-700/30 backdrop-blur-lg rounded-3xl shadow-xl p-8 animate-fadeInUp">
+          {/* Video Player */}
+          <div className="relative rounded-3xl border border-violet-600 overflow-hidden shadow-lg shadow-violet-900 group">
+            <video
+              src={selectedVideo?.url}
+              controls
+              className="w-full h-96 object-contain bg-black rounded-3xl"
+              onTimeUpdate={(e) => handleVideoProgress(Math.floor(e.target.currentTime))}
+              poster={course.thumbnail}
+              preload="metadata"
+            />
+            {selectedVideo?.isPreview && (
+              <span className="absolute top-4 left-4 px-3 py-1 rounded-full bg-gradient-to-r from-violet-700/90 to-violet-400/75 text-white text-xs font-semibold shadow-md select-none">
+                Preview
+              </span>
+            )}
+          </div>
+          {/* Selected Video Info */}
+          <div>
+            <h3 className="text-xl font-bold text-violet-400 select-text">
+              {selectedVideo?.isPreview ? 'Course Preview' : `${selectedVideo?.index}. ${selectedVideo?.title}`}
+            </h3>
+            <p className="text-gray-400 text-sm mt-2 select-text">{selectedVideo?.description}</p>
+          </div>
+          {/* Course Content List */}
+          <div>
+            <h3 className="text-violet-400 font-bold mb-4 select-none text-lg tracking-wide">Course Content</h3>
+            <div className="flex flex-col gap-3">
+              {course.videos.map((video, index) => {
+                const isCompleted = completedVideos.includes(video._id);
+                const isSelected = selectedVideo?.index === index + 1 && !selectedVideo?.isPreview;
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleVideoSelect(video, index)}
+                    className={`flex justify-between items-center rounded-2xl px-6 py-4 border transition-transform duration-200 shadow-md cursor-pointer focus:outline-none ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-violet-700 via-pink-600 to-violet-900 border-violet-500 scale-105 shadow-violet-700'
+                        : 'bg-slate-800 border-slate-600 hover:bg-slate-700/90 hover:scale-[1.02]'
+                    }`}
+                    aria-current={isSelected ? 'true' : 'false'}
+                  >
+                    <div className="text-left">
+                      <h4
+                        className={`font-semibold ${isSelected ? 'text-pink-300' : 'text-white'} truncate max-w-xl`}
+                        title={video.title}
+                      >
+                        {index + 1}. {video.title}
+                      </h4>
+                      <p className="text-gray-400 text-xs truncate max-w-xl">{video.description}</p>
+                    </div>
+                    <div className="flex items-center gap-3 whitespace-nowrap">
+                      {isCompleted && (
+                        <span className="bg-green-400/25 text-green-300 text-xs px-3 py-1 rounded-full font-bold shadow-md select-none cursor-default">
+                          Completed
+                        </span>
+                      )}
+                      <span className="text-violet-400 text-xs select-none">{Number(video.duration).toFixed(2)} min</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          {/* Progress Bar if purchased */}
+          {course.isPurchased && (
+            <section className="mt-10 bg-gradient-to-r from-violet-800 to-slate-800 rounded-3xl shadow-lg p-6 border border-violet-700/60 flex flex-col gap-3">
+              <h3 className="font-bold text-violet-300 text-lg select-none">Your Progress</h3>
+              <div className="flex items-center gap-5">
+                <div className="w-full h-3 rounded-lg bg-slate-700/70 overflow-hidden shadow-inner border border-violet-900/50">
+                  <div
+                    style={{ width: `${(completedVideos.length / course.videos.length) * 100}%` }}
+                    className="h-full bg-gradient-to-r from-violet-500 to-pink-400 transition-all duration-300"
+                  />
+                </div>
+                <span className="text-pink-300 text-xs font-semibold select-none">{completedVideos.length} / {course.videos.length} completed</span>
+              </div>
+            </section>
+          )}
+          {/* Certificate Panel */}
+          {course.isPurchased && certificate && (
+            <section className="mt-10 bg-gradient-to-r from-green-800/60 to-teal-800/60 rounded-3xl shadow-xl border border-green-400/40 p-6 flex items-center justify-between animate-fadeInUp select-none">
+              <div className="flex items-center gap-4">
+                <span className="text-4xl text-green-400">🎓</span>
+                <div>
+                  <h3 className="font-bold text-green-300 mb-1 select-text">Course Completed!</h3>
+                  <p className="text-gray-300 text-xs select-text">
+                    You've earned a certificate for this course
+                  </p>
+                </div>
+              </div>
+              <Link
+                to={`/certificate/${certificate.certificateId}`}
+                className="bg-gradient-to-r from-green-400 to-teal-400 px-5 py-3 rounded-2xl text-green-900 font-bold hover:scale-110 transition-transform shadow-lg hover:ring-2 hover:ring-green-500"
+                aria-label="View your course completion certificate"
+              >
+                View Certificate
+              </Link>
+            </section>
+          )}
+        </article>
+
+        {/* Right: Sidebar with Instructor and Progress */}
+        <aside className="w-full md:w-80 sticky top-24 bg-slate-900/60 backdrop-blur-lg border border-violet-700/30 rounded-3xl shadow-xl flex flex-col items-center px-8 py-10 gap-8 animate-fadeInRight select-none">
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-violet-300 mb-2">Instructor</h2>
+            <p className="text-white text-lg font-medium truncate">
+              {course.instructor.firstname} {course.instructor.lastname}
+            </p>
+            <p className="text-gray-400 text-sm truncate">{course.instructor.email}</p>
+          </div>
+          <div className="w-20 h-20 rounded-full bg-violet-700/50 border-4 border-violet-400 shadow-lg animate-pulse grid place-items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-10 w-10 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+              aria-hidden="true"
+            >
+              <circle cx={12} cy={8} r={4} stroke="white" strokeWidth={2} />
+              <ellipse cx={12} cy={16} rx={6} ry={7} stroke="white" strokeWidth={2} />
+            </svg>
+          </div>
+          <CourseProgress courseId={course._id} />
+        </aside>
+      </section>
+
+      {/* Purchase Modal */}
+      {showPurchaseModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-2xl p-6">
+          <div className="bg-slate-900/95 rounded-3xl shadow-2xl p-10 max-w-md w-full border border-violet-400/30 animate-fadeInUp">
+            <header className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-bold text-violet-400">Purchase Course</h2>
+              <button
+                onClick={() => setShowPurchaseModal(false)}
+                className="text-pink-400 hover:text-red-600 focus:outline-none"
+                aria-label="Close purchase modal"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-8 w-8"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </header>
+            <article className="mb-10 select-text">
+              <h3 className="font-medium text-white text-2xl mb-1">{course.title}</h3>
+              <p className="text-violet-300 text-md truncate">{course.category} &bull; {course.duration}</p>
+            </article>
+            <CoursePurchaseController
+              courseId={courseId}
+              price={course.price}
+              onPurchaseComplete={() => {
+                fetchCourseDetails();
+                setShowPurchaseModal(false);
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Comments Section */}
+      <section className="max-w-5xl mx-auto mt-16 mb-16 animate-fadeIn">
+        <CommentReviews courseId={courseId} isPurchased={course.isPurchased} />
+      </section>
+    </div>
+  );
 }
 
 export default CourseDetails;
+
