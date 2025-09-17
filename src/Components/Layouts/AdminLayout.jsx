@@ -55,7 +55,7 @@ const AdminLayout = ({ children }) => {
 
   // Handle navigation to dashboard with specific tab
   const handleNavigation = (path, tabId) => {
-    if (path === '/admin/dashboard' && tabId) {
+    if (path === '/admin/main' && tabId) {
       navigate(path, { state: { activeTab: tabId } });
     } else {
       navigate(path);
